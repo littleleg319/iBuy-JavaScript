@@ -5,7 +5,7 @@
 <title>iBuy Shopping Center</title>
 <script src="./js/utilities.js" charset="utf-8" defer></script>
 <script src="./js/login.js" charset="utf-8" defer></script>
-<link rel="stylesheet" type="text/css" media="all" href="./css/mystyle.css" th:href="@{/css/mystyle.css}"/>
+<link rel="stylesheet" type="text/css" media="all" href="./css/login.css" th:href="@{/css/login.css}"/>
 </head>
 <body>
 
@@ -13,13 +13,11 @@
 
 <div class="login">
 	<form action="#">
-	<fieldset>
 		<label class="a">Username</label><br>
 		<input type="text" name="username" placeholder="Your Username..." class="form" required> <br>
 		<label class="a">Password</label><br>
 		<input type="password" name="pwd" placeholder="Your Password..." class="form" required><br>
 		<input type="button" value="Login" class="submit" id="loginbutton">
-	</fieldset>
 	</form>
 		<p th:text="${errorMsg}"></p>
 </div>

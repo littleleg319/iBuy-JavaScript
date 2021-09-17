@@ -4,13 +4,18 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import ibuy.ria.beans.User;
 import ibuy.ria.dao.UserDAO;
@@ -20,10 +25,12 @@ import ibuy.ria.utilities.ConnectionHandler;
  * Servlet implementation class CheckLogin
  */
 @WebServlet("/CheckLogin")
+@MultipartConfig
+
 public class CheckLogin extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-       
+	private TemplateEngine templateEngine;
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -31,7 +38,16 @@ public class CheckLogin extends HttpServlet {
         super();
         // TODO Auto-generated constructor stub
     }
-
+    
+    public void init() throws ServletException {
+		connection = ConnectionHandler.getConnection(getServletContext());
+		ServletContext servletContext = getServletContext();
+		ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
+		templateResolver.setTemplateMode(TemplateMode.HTML);
+		this.templateEngine = new TemplateEngine();
+		this.templateEngine.setTemplateResolver(templateResolver);
+		templateResolver.setSuffix(".html");
+	}
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */

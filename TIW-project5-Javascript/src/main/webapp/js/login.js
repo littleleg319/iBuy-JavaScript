@@ -7,7 +7,7 @@
   document.getElementById("loginbutton").addEventListener('click', (e) => {
     var form = e.target.closest("form");
     if (form.checkValidity()) {
-      makeCall("POST", 'CheckLogin', e.target.closest("form"),
+      makeCall("POST", 'CheckLogin',form,
         function(x) {
           if (x.readyState == XMLHttpRequest.DONE) {
             var message = x.responseText;

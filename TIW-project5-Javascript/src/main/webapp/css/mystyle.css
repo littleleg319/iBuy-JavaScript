@@ -39,3 +39,16 @@ body {
   cursor: pointer;
   font:bold 20px Verdana, sans-serif ;
 }
+
+input[type=button]:hover {
+  background-color: #ff4040;
+}
+
+.login {
+	margin: 0 auto;
+  width: 500px;
+  border-radius: 5px;
+  background-color: #dddddd;
+  padding: 20px;
+  text-align: center;
+}
