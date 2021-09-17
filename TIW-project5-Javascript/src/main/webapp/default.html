@@ -14,12 +14,26 @@
 <div class="login">
 	<form action="#">
 		<label class="a">Username</label><br>
-		<input type="text" name="username" placeholder="Your Username..." class="form" required> <br>
+		<input type="text" id="username" name="username" placeholder="Your Username..." class="form" required> <br>
 		<label class="a">Password</label><br>
-		<input type="password" name="pwd" placeholder="Your Password..." class="form" required><br>
+		<input type="password" id="password" name="pwd" placeholder="Your Password..." class="form" required><br>
 		<input type="button" value="Login" class="submit" id="loginbutton">
 	</form>
-		<p th:text="${errorMsg}"></p>
 </div>
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Alert message...</h2>
+    </div>
+    <div class="modal-body">
+      <p id="errMessage"></p>
+    </div>
+    </div>
+  </div>
+
 </body>
 </html>

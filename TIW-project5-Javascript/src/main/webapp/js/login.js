@@ -10,21 +10,20 @@
       makeCall("POST", 'CheckLogin',form,
         function(x) {
           if (x.readyState == XMLHttpRequest.DONE) {
-            var message = x.responseText;
+            //var message = x.responseText;
             switch (x.status) {
               case 200:
-            	sessionStorage.setItem('username', message);
                 window.location.href = "Home.html";
                 break;
               case 400: // bad request
-                document.getElementById("errormessage").textContent = message;
+                showAlert("Please fill with your Username and Password!")
                 break;
               case 401: // unauthorized
-                  document.getElementById("errormessage").textContent = message;
+                  showAlert("Wrong Username and/or Password!");
                   break;
               case 500: // server error
-            	document.getElementById("errormessage").textContent = message;
-                break;
+              window.location.href = "errorPage.html";
+              break;
             }
           }
         }
