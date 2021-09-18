@@ -10,9 +10,10 @@
       makeCall("POST", 'CheckLogin',form,
         function(x) {
           if (x.readyState == XMLHttpRequest.DONE) {
-            //var message = x.responseText;
+            var message = x.responseText;
             switch (x.status) {
               case 200:
+                window.sessionStorage.setItem('userid', message);
                 window.location.href = "Home.html";
                 break;
               case 400: // bad request
