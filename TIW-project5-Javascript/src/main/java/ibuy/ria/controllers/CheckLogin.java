@@ -17,6 +17,8 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
+import com.google.gson.Gson;
+
 import ibuy.ria.beans.User;
 import ibuy.ria.dao.UserDAO;
 import ibuy.ria.utilities.ConnectionHandler;
@@ -81,11 +83,12 @@ public class CheckLogin extends HttpServlet {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					response.getWriter().println("Incorrect credentials");
 				} else {
+					String json = new Gson().toJson(user);
 					request.getSession().setAttribute("user", user);
 					response.setStatus(HttpServletResponse.SC_OK);
 					response.setContentType("application/json");
 					response.setCharacterEncoding("UTF-8");
-					response.getWriter().println(usrn);
+					response.getWriter().write(json);
 				}
 			}
 

@@ -2,10 +2,10 @@
  * Home Page Orchestrator
  */
 {
-    pageOrchastrator = new PageOrchastrator();
+    pageOrchestrator = new PageOrchestrator();
 
     window.addEventListener("load", () => {
-	    if (sessionStorage.getItem("userid") == null) {
+	    if (sessionStorage.getItem("user") == null) {
 	      window.location.href = "default.html";
 	    } else {
 	      pageOrchestrator.start(); // initialize the components
@@ -14,16 +14,16 @@
 
 
     function PersonalMessage (message_container){
-        this.user = "<%=session.getAttribute('user')%>";
-        this.show = function(){
-          message_container.textContent = this.user.name;
+			var user = sessionStorage.getItem("user");
+			var usr = JSON.parse(user);
+            this.show = function(){
+          message_container.textContent = usr.name;
         }
     }
 
     function PageOrchestrator (){
       this.start = function(){
-        personalMessage = new PersonalMessage(id_username);
-        document.getDocumentById ("id_username");
+        personalMessage = new PersonalMessage(document.getElementById ("id_username"));
         personalMessage.show();
       }
     }

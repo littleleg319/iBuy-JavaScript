@@ -13,9 +13,9 @@
             var message = x.responseText;
             switch (x.status) {
               case 200:
-                window.sessionStorage.setItem('userid', message);
-                window.location.href = "Home.html";
-                break;
+                 window.sessionStorage.setItem('user', message);
+                 window.location.href = "Home.html";
+                 break;
               case 400: // bad request
                 showAlert("Please fill with your Username and Password!")
                 break;
