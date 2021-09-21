@@ -32,8 +32,7 @@ import ibuy.ria.utilities.ConnectionHandler;
 public class CheckLogin extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-	private TemplateEngine templateEngine;
-    /**
+	/**
      * @see HttpServlet#HttpServlet()
      */
     public CheckLogin() {
@@ -63,7 +62,6 @@ public class CheckLogin extends HttpServlet {
 				pwd = StringEscapeUtils.escapeJava(request.getParameter("pwd"));
 				if (usrn == null || pwd == null || usrn.isEmpty() || pwd.isEmpty() ) {
 					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-					response.getWriter().println("Credentials must be not null");
 					return;
 				}
 				// query db to authenticate for user
@@ -73,7 +71,6 @@ public class CheckLogin extends HttpServlet {
 					user = userDao.checkCredentials(usrn, pwd);
 				} catch (SQLException e) {
 					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-					response.getWriter().println("Internal server error, retry later");
 					return;
 				}
 
@@ -81,7 +78,6 @@ public class CheckLogin extends HttpServlet {
 				// return an error status code and message
 				if (user == null) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.getWriter().println("Incorrect credentials");
 				} else {
 					String json = new Gson().toJson(user);
 					request.getSession().setAttribute("user", user);

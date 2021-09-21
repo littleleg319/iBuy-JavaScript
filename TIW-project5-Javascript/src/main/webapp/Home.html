@@ -6,14 +6,56 @@
 <script src="./js/utilities.js" charset="utf-8" defer></script>
 <script src="./js/pagemgmt.js" charset="utf-8" defer></script>
 <link rel="stylesheet" type="text/css" media="all" href="./css/home.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
 	<h1> <a href="./Home.html"><img src="./img/Logo.png" class="logo"></a></h1>
 	
 	<ul>
-		 <li class="welcome"> Welcome Back <span id="id_username"></span> Nice to see you again!</li>
- 		 <li class="logout"><a href="Logout" class="logout">Logout</a></li>
+		 <li class="welcome"> Welcome back <span id="id_username"></span>! Enjoy your shopping!</li>
+		<li class="logout"><a href="Logout" class="logout">Logout</a></li>
+		 		<li class="orders">
+         <a href="#">My Orders</a>
+      </li>
+		<li class="cart">
+         <a href="#">
+          <i class="fas fa fa-shopping-cart fa-lg"></i>
+          <span class="cart-number" id="cart-items">
+            0
+          </span>
+        </a>
+      </li>
 	</ul>
+	
+	<div id="nav-search">
+	<form  action="#">
+	<div class="nav-left">
+	<select class="keyword" id="menu" name="category">
+	</select>
+	</div>
+	<div class="nav-right">
+  		<input type="text" placeholder="Find your product..." name="keyword" class="keyword">
+ 		 <input type="button" value="Find" class="search">
+	
+	</div>
+	</form>
+		<p id="err_msg" th:text="${'Sorry! No items found...'}"></p>
+	</div>
 
+
+	
+	<p id="recent_text" class="recent_text">Products you recently seen or currently in offer...</p>
+
+	<table id="id_recent_tab">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Description</th>
+				<th>See details</th>
+			</tr>
+		</thead>
+		<tbody id="id_recent_body">
+ 	 			</tbody>
+	</table>
 </body>
 </html>
