@@ -34,15 +34,39 @@
 	</select>
 	</div>
 	<div class="nav-right">
-  		<input type="text" placeholder="Find your product..." name="keyword" class="keyword">
- 		 <input type="button" value="Find" class="search">
+  		<input type="text" placeholder="Find your product..." name="keyword" id="keyword" class="keyword">
+ 		 <input type="button" value="Find" id="Find" onclick="Search()" class="search">
 	
 	</div>
 	</form>
-		<p id="err_msg" th:text="${'Sorry! No items found...'}"></p>
+		<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Alert message...</h2>
+    </div>
+    <div class="modal-body">
+      <p id="errMessage"></p>
+    </div>
+    </div>
+  </div>
 	</div>
-
-
+	
+	<p id ="research" class="research">Results for <span id="id_keyword"></span> <span id="id_category"></span></p> 
+	<table id="search_tab">
+		<thead>
+			<tr>
+				<th>Code</th>
+				<th>Product Name</th>
+				<th>Starting from</th>
+			</tr>
+		</thead>
+		<tbody id="search_body">
+					</tbody>
+	</table>
 	
 	<p id="recent_text" class="recent_text">Products you recently seen or currently in offer...</p>
 

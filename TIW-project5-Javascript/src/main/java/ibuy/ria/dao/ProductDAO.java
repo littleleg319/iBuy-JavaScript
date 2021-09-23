@@ -108,5 +108,80 @@ public class ProductDAO {
 		}
 		return categories;
 	}
+	
+	
+	public List<Product> findProductsByKey(String key) throws SQLException{
+		List<Product> prods = new ArrayList<Product>();
+		String escape_char = "%";
+		String check = "SELECT * FROM product as p , supplier_product_price as s WHERE p.code=s.idproduct AND (p.name like ? or p.description like ?) AND s.price=(SELECT min(price) from supplier_product_price WHERE supplier_product_price.idproduct = p.code) ORDER BY s.price ASC";
+		try (PreparedStatement ps = con.prepareStatement(check);) {
+			ps.setString(1,"%" + key + "%");
+			ps.setString(2,"%" + key + "%");
+			ResultSet res = ps.executeQuery();
+			if (!res.isBeforeFirst())
+				return null;
+			else {
+				while(res.next()) {
+					Product prod = new Product();
+					prod.setCode(res.getString("code"));
+					prod.setName(res.getString("name"));
+					prod.setPrice(res.getFloat("price"));
+					prods.add(prod);
+				}
+			}
+		}
+		return prods;
+	}
+	
+	public List<Product> findProductsByCategory (String category, String keyword) throws SQLException {
+		List<Product> prods = new ArrayList<Product>();	
+		if (keyword == null || keyword=="") {
+			//non ho messo keyword, ma solo category
+		String query = "SELECT * FROM product as p , supplier_product_price as s WHERE p.code=s.idproduct AND p.category = ? AND s.price=(SELECT min(price) from supplier_product_price WHERE supplier_product_price.idproduct = p.code) ORDER BY s.price ASC";
+		try (PreparedStatement pstatement = con.prepareStatement(query);) {
+				pstatement.setString(1, category);
+			try (ResultSet result = pstatement.executeQuery();) {
+				if (!result.isBeforeFirst()) // no results. Something wrong
+					return null;
+				else {
+					while (result.next()) {
+						Product prod = new Product();
+						prod.setCode(result.getString("code"));
+						prod.setName(result.getString("name"));
+						prod.setDescription(result.getString("description"));
+						prod.setCategory(result.getString("category"));
+						prod.setPrice(result.getFloat("price"));
+						prods.add(prod);
+					}
+				}
+			}
+		}
+		return prods;
+		} else  {
+			//filtro sia per category che per keyword
+			String query = "SELECT * FROM product as p , supplier_product_price as s WHERE p.code=s.idproduct AND (p.name like ? or p.description like ?) AND p.category = ? AND s.price=(SELECT min(price) from supplier_product_price WHERE supplier_product_price.idproduct = p.code) ORDER BY s.price ASC";
+			try (PreparedStatement pstatement = con.prepareStatement(query);) {
+				pstatement.setString(1,"%" + keyword + "%");
+				pstatement.setString(2,"%" + keyword + "%");
+				pstatement.setString(3, category);
+				try (ResultSet result = pstatement.executeQuery();) {
+					if (!result.isBeforeFirst()) // no results. Something wrong
+						return null;
+					else {
+						while (result.next()) {
+							Product prod = new Product();
+							prod.setCode(result.getString("code"));
+							prod.setName(result.getString("name"));
+							prod.setDescription(result.getString("description"));
+							prod.setCategory(result.getString("category"));
+							prod.setPrice(result.getFloat("price"));
+							prods.add(prod);
+						}
+					}
+				}
+			}
+			return prods;
+		}
+	}
 }
 

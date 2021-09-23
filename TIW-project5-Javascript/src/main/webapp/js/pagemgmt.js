@@ -54,7 +54,7 @@
 		};
 		//update Table View Function
     this.update = function(arrayProducts) {
-	      var elem, i, row, destcell, datecell, linkcell, anchor;
+	      var elem, i, row, destcell, descell, linkcell, anchor;
 	        this.message_container_body.innerHTML = ""; // empty the table body
 	      // build updated list
 	      var self = this;
@@ -63,9 +63,9 @@
 	        destcell = document.createElement("td");
 	        destcell.textContent = product.name;
 	        row.appendChild(destcell);
-	        datecell = document.createElement("td");
-	        datecell.textContent = product.description;
-	        row.appendChild(datecell);
+	        descell = document.createElement("td");
+	        descell.textContent = product.description;
+	        row.appendChild(descell);
 	        linkcell = document.createElement("td");
 	        anchor = document.createElement("a");
 	        linkcell.appendChild(anchor);
@@ -87,7 +87,6 @@
 	};
 
 	function ShowCategories(){
-		var self = this;
 		this.show = function(){
 			makeCall("GET", "ShowCategories", null, function(x) {
 				if (x.readyState == 4){
@@ -114,6 +113,73 @@
 	};
 };
 
+	
+	function Search(){
+		var e1 = document.getElementById("Find");
+		var form = e1.closest("form");
+		var elem_cat = document.getElementById("menu");
+		var elem_key = document.getElementById("keyword");
+		var category = elem_cat.value;
+		var keyword = elem_key.value;
+		var container_body = document.getElementById("search_body");
+		var self = this;
+			
+			container_body.style.visibility="hidden";
+				makeCall("GET","ShowResultsData?category=" + category + "&keyword=" + keyword, form, 
+			function(x){
+				if (x.readyState == XMLHttpRequest.DONE) {
+           			 var message = x.responseText;
+            switch (x.status) {
+              case 200:
+				container_body.innerHTML = "";
+				 var products = JSON.parse(x.responseText);
+				 products.forEach(function(product){
+				row = document.createElement("tr");
+	        	destcell = document.createElement("td");
+	       		destcell.textContent = product.code;
+	        	row.appendChild(destcell);
+	       		descell = document.createElement("td");
+				anchor = document.createElement("a");
+				descell.appendChild(anchor);
+				linkText = document.createTextNode(product.name);
+				anchor.appendChild(linkText);
+				anchor.setAttribute('code', product.code);
+				anchor.addEventListener("click", (e) => {
+					ProductDetails.show(e.target.getAttribute("code")); // the list must know the details container
+	        		}, false);
+				anchor.href = "#";
+	        	row.appendChild(descell);
+	        	pricecell = document.createElement("td");
+	       		pricecell.textContent = ("EUR" + product.price);
+	        	row.appendChild(pricecell);
+				container_body.appendChild(row);
+	        	});
+				document.getElementById("search_tab").style.display = "initial";
+				container_body.style.visibility="visible";
+				if (keyword !== null){
+					document.getElementById("keyword").innerHTML = keyword;
+				};
+				if (category !== null || category !== "Initial"){
+					document.getElementById("category").innerHTML = category;
+				};
+                break;
+              case 400: // bad request
+                showAlert("Please select a category and/or insert a keyword for starting search products!")
+                document.getElementById("research").style.display = "none";
+				break;
+              case 404: // not found
+				  document.getElementById("research").style.display = "none";
+                  showAlert("Sorry! No items found for this search criteria.....");
+                  break;
+              case 500: // server error
+			  document.getElementById("research").style.display = "none";
+              window.location.href = "errorPage.html";
+              break;
+            }
+          }
+			});
+		}; 
+	
     function PageOrchestrator (){
       //initial page load
       this.start = function(){
@@ -127,6 +193,9 @@
 		//Show Category List
 		categories = new ShowCategories();
 		categories.show();
+		document.getElementById("search_tab").style.display = "none";
+		document.getElementById("research").style.display = "none";
      						 }
   		 };
-}
+						
+	}
