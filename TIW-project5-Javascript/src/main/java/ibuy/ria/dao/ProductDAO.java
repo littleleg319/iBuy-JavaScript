@@ -1,11 +1,14 @@
 package ibuy.ria.dao;
 
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.tomcat.util.codec.binary.Base64;
 
 import ibuy.ria.beans.Product;
 
@@ -181,6 +184,73 @@ public class ProductDAO {
 				}
 			}
 			return prods;
+		}
+	}
+	
+	public Product findProductDetails(String productid) throws SQLException{
+		String check = "SELECT * FROM product WHERE code = ?";
+		Product prod = new Product();
+		try (PreparedStatement ps = con.prepareStatement(check);) {
+			ps.setString(1, productid);
+			ResultSet res = ps.executeQuery();
+			if (!res.isBeforeFirst())
+				return null;
+			else {
+				while(res.next()) {
+					prod.setCode(res.getString("code"));
+					prod.setName(res.getString("name"));
+					prod.setDescription(res.getString("description"));
+					prod.setCategory(res.getString("category"));
+					Blob tmp = res.getBlob("photo");
+					int photolength = (int) tmp.length();
+					byte[] tmpasbyte = tmp.getBytes(1, photolength);
+					prod.setPhoto(Base64.encodeBase64String(tmpasbyte));
+					tmp.free();
+				}
+			}
+		}
+		return prod;
+	}
+	
+	public void UpdateProductSeen(int userid, String productId)  {
+		String usr = String.valueOf(userid);
+		String query = "SELECT  * FROM user_product  WHERE userid = ? AND productid =?";
+		try (PreparedStatement pstatement = con.prepareStatement(query);) {
+			pstatement.setString(1, usr);
+			pstatement.setString(2, productId);
+			try (ResultSet result = pstatement.executeQuery();) {
+				if (!result.isBeforeFirst()) { // no results, insert new value
+					String insert_seen = "INSERT INTO user_product (userid, productid, timestamp) VALUES (?, ?, NOW())";
+					PreparedStatement ps = con.prepareStatement(insert_seen);
+					ps.setString(1, usr);
+					ps.setString(2, productId);
+					int esito = ps.executeUpdate();
+						if (esito != 0) {
+							//ho fatto l'insert --> cancello la riga pi� vecchia 
+							try {
+								String delete = "DELETE FROM user_product where userid = ? order by timestamp ASC LIMIT 1";
+								PreparedStatement dl = con.prepareStatement(delete);
+								dl.setString(1, usr);
+								dl.executeUpdate();
+							} catch (SQLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+						}
+					} 
+				} else { //aggiorno timestamp di una entry esistente
+					String update_seen = "UPDATE user_product SET timestamp=NOW() WHERE userid = ? AND productid = ?";
+					PreparedStatement ps = con.prepareStatement(update_seen);
+					ps.setString(1, usr);
+					ps.setString(2, productId);
+					ps.executeUpdate();
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 }

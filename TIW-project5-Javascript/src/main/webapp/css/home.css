@@ -240,3 +240,10 @@ input[type=button]:hover {
 p#errMessage {
     font: 14px Verdana, sans-serif;
 }
+
+p#research {
+    font-weight: bold;
+    font-size: 19px;
+    font-family: Verdana, sans-serif;
+    color: royalblue;
+}

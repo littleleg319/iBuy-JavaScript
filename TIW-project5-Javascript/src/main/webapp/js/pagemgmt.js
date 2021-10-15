@@ -2,6 +2,7 @@
  * Home Page Orchestrator
  */
 {
+    let productdetails;
     pageOrchestrator = new PageOrchestrator();
 
     window.addEventListener("load", () => {
@@ -28,6 +29,7 @@
     this.reset = function (){
       this.message_container.style.visibility = "hidden";
       document.getElementById("recent_text").style.visibility = "hidden";
+	  this.message_container_body.style.visibility = "hidden";
     }
     //show function
 		this.show = function() {
@@ -71,11 +73,11 @@
 	        linkcell.appendChild(anchor);
 	        linkText = document.createTextNode("Show details");
 	        anchor.appendChild(linkText);
-	        //anchor.missionid = mission.id; // make list item clickable
 	        anchor.setAttribute('code', product.code); // set a custom HTML attribute
 	        anchor.addEventListener("click", (e) => {
+            var code = e.target.getAttribute("code");
 	          // dependency via module parameter
-	          ProductDetails.show(e.target.getAttribute("code")); // the list must know the details container
+	           productdetails.show(code); // the list must know the details container
 	        }, false);
 	        anchor.href = "#";
 	        row.appendChild(linkcell);
@@ -113,7 +115,7 @@
 	};
 };
 
-	
+
 	function Search(){
 		var e1 = document.getElementById("Find");
 		var form = e1.closest("form");
@@ -122,10 +124,27 @@
 		var category = elem_cat.value;
 		var keyword = elem_key.value;
 		var container_body = document.getElementById("search_body");
+		document.getElementById("research").style.display = "none";
 		var self = this;
-			
-			container_body.style.visibility="hidden";
-				makeCall("GET","ShowResultsData?category=" + category + "&keyword=" + keyword, form, 
+		productdetails.reset();
+		if (keyword === ""){
+				document.getElementById("research").style.display = "none";
+				} else { if (category !== "Initial"){
+					document.getElementById("research").style.display = "initial";
+					document.getElementById("id_keyword").innerHTML = " and Keyword " + keyword;
+					document.getElementById("id_category").innerHTML = " Category " + category;
+					} else {
+					document.getElementById("research").style.display = "initial";
+					document.getElementById("id_keyword").innerHTML = "Keyword " + keyword;
+					}
+				};
+		if (category !== "Initial"){
+			if (keyword === ""){
+					document.getElementById("research").style.display = "initial";
+					document.getElementById("id_category").innerHTML = " Category" + category;}
+		} 
+					container_body.style.visibility="hidden";
+				makeCall("GET","ShowResultsData?category=" + category + "&keyword=" + keyword, form,
 			function(x){
 				if (x.readyState == XMLHttpRequest.DONE) {
            			 var message = x.responseText;
@@ -145,23 +164,20 @@
 				anchor.appendChild(linkText);
 				anchor.setAttribute('code', product.code);
 				anchor.addEventListener("click", (e) => {
-					ProductDetails.show(e.target.getAttribute("code")); // the list must know the details container
+					productdetails.show(e.target.getAttribute("code")); // the list must know the details container
 	        		}, false);
 				anchor.href = "#";
 	        	row.appendChild(descell);
 	        	pricecell = document.createElement("td");
-	       		pricecell.textContent = ("EUR" + product.price);
+	       		pricecell.textContent = ("EUR  	" + product.price);
 	        	row.appendChild(pricecell);
 				container_body.appendChild(row);
 	        	});
 				document.getElementById("search_tab").style.display = "initial";
 				container_body.style.visibility="visible";
-				if (keyword !== null){
-					document.getElementById("keyword").innerHTML = keyword;
-				};
-				if (category !== null || category !== "Initial"){
-					document.getElementById("category").innerHTML = category;
-				};
+				RecentSeenProduct.reset();
+				
+				
                 break;
               case 400: // bad request
                 showAlert("Please select a category and/or insert a keyword for starting search products!")
@@ -172,30 +188,91 @@
                   showAlert("Sorry! No items found for this search criteria.....");
                   break;
               case 500: // server error
-			  document.getElementById("research").style.display = "none";
+			        document.getElementById("research").style.display = "none";
               window.location.href = "errorPage.html";
               break;
             }
           }
 			});
-		}; 
-	
+		};
+
+	function ProductDetails(message_container, message_container_body){
+		this.message_container = message_container;
+   		 this.message_container_body = message_container_body;
+   	 //Reset function
+    this.reset = function (){
+     	 this.message_container.style.display = "none";
+         this.message_container_body.style.visibility = "hidden";
+    }
+		this.show = function(code){
+			makeCall("GET","ProductDetailData?code=" + code, null,
+			function(x){
+				if (x.readyState == XMLHttpRequest.DONE) {
+           			 var message = x.responseText;
+            switch (x.status) {
+              case 200:
+					//var prod_body = document.getElementById("id_prod_detail_body");
+					message_container_body.innerHTML = "";
+				 	var result = JSON.parse(x.responseText);
+					var details = result[0];
+					var supplier = result[1];
+					var ranges = result[2];
+					row = document.createElement("tr");
+	        		destcell = document.createElement("td");
+	       			imgcell = document.createElement("img");
+	        		destcell.appendChild(imgcell);
+					imgcell.setAttribute('src', 'data:image/jpeg;base64,' + details.photo);
+					row.appendChild(destcell);
+					dcell = document.createElement("td");
+					list = document.createElement("dl");
+					list_det = document.createElement("dt");
+         			list_det.textContent = details.code;
+					list_det.style.fontWeight = "bold";
+          			list.appendChild(list_det);
+          			list_ds = document.createElement("dt");
+          			list_ds.textContent = details.name;
+					list_ds.style.fontWeight = "bold";
+          			list.appendChild(list_ds);
+          			list_dt = document.createElement("dt");
+          			list_dt.textContent = details.description;
+          			list.appendChild(list_dt);
+          			dcell.appendChild(list);
+          			row.appendChild(dcell);
+          			message_container_body.appendChild(row);
+  		 			message_container.style.display = "initial";
+					message_container_body.style.visibility = "visible";
+          			break;
+          case 500 :
+          window.location.href = "errorPage.html";
+          break;
+					}
+				}
+			});
+		};
+	};
+
     function PageOrchestrator (){
       //initial page load
       this.start = function(){
 		//Set personal message
         personalMessage = new PersonalMessage(document.getElementById ("id_username"));
         personalMessage.show();
+		//Initialize product details
+		productdetails = new ProductDetails(document.getElementById("id_prod_detail"),document.getElementById("id_prod_detail_body"));
+		productdetails.reset();
 		//Show recent Prods or in offer
 		  RecentSeenProduct = new RecentSeenProduct(document.getElementById("id_recent_tab"),document.getElementById("id_recent_body") );
- 	    RecentSeenProduct.reset();
+ 	   	  RecentSeenProduct.reset();
 		  RecentSeenProduct.show();
 		//Show Category List
 		categories = new ShowCategories();
 		categories.show();
 		document.getElementById("search_tab").style.display = "none";
 		document.getElementById("research").style.display = "none";
+
+		
+  		
      						 }
   		 };
-						
+
 	}

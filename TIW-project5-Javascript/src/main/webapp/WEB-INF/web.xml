@@ -32,8 +32,10 @@
   <filter-mapping> 
     <filter-name>LoginChecker</filter-name>
     <url-pattern>/Home.html</url-pattern>
-     <url-pattern>/ShowRecentProducts</url-pattern>
-     <url-pattern>/ShowCategories</url-pattern>
+    <url-pattern>/ShowRecentProducts</url-pattern>
+    <url-pattern>/ShowCategories</url-pattern>
+	<url-pattern>/ShowResultsData</url-pattern>
+	<url-pattern>/ProductDetailData</url-pattern>
   </filter-mapping> 
   <welcome-file-list>
     <welcome-file>default.html</welcome-file>
