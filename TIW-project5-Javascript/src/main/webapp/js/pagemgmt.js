@@ -2,7 +2,7 @@
  * Home Page Orchestrator
  */
 {
-    let productdetails;
+    let productdetails, shoppingcart;
     pageOrchestrator = new PageOrchestrator();
 
     window.addEventListener("load", () => {
@@ -124,6 +124,8 @@
 		var category = elem_cat.value;
 		var keyword = elem_key.value;
 		var container_body = document.getElementById("search_body");
+    document.getElementById("id_category").innerHTML = "";
+    document.getElementById("id_keyword").innerHTML = "";
 		document.getElementById("research").style.display = "none";
 		var self = this;
 		productdetails.reset();
@@ -133,16 +135,20 @@
 					document.getElementById("research").style.display = "initial";
 					document.getElementById("id_keyword").innerHTML = " and Keyword " + keyword;
 					document.getElementById("id_category").innerHTML = " Category " + category;
+          document.getElementById("menu").value = "Initial";
+          document.getElementById("keyword").value = "";
 					} else {
 					document.getElementById("research").style.display = "initial";
-					document.getElementById("id_keyword").innerHTML = "Keyword " + keyword;
+					document.getElementById("id_keyword").innerHTML = " Keyword " + keyword;
+          document.getElementById("keyword").value = "";
 					}
 				};
 		if (category !== "Initial"){
 			if (keyword === ""){
 					document.getElementById("research").style.display = "initial";
-					document.getElementById("id_category").innerHTML = " Category" + category;}
-		} 
+					document.getElementById("id_category").innerHTML = " Category " + category;}
+          document.getElementById("menu").value = "Initial";
+		}
 					container_body.style.visibility="hidden";
 				makeCall("GET","ShowResultsData?category=" + category + "&keyword=" + keyword, form,
 			function(x){
@@ -176,19 +182,28 @@
 				document.getElementById("search_tab").style.display = "initial";
 				container_body.style.visibility="visible";
 				RecentSeenProduct.reset();
-				
-				
                 break;
               case 400: // bad request
                 showAlert("Please select a category and/or insert a keyword for starting search products!")
                 document.getElementById("research").style.display = "none";
+                document.getElementById("menu").value = "Initial";
+                document.getElementById("keyword").value = "";
 				break;
               case 404: // not found
-				  document.getElementById("research").style.display = "none";
+				          document.getElementById("research").style.display = "none";
                   showAlert("Sorry! No items found for this search criteria.....");
+                  document.getElementById("menu").value = "Initial";
+                  document.getElementById("keyword").value = "";
+                  document.getElementById("search_tab").style.display = "none";
+              		document.getElementById("research").style.display = "none";
+                  RecentSeenProduct.show();
                   break;
               case 500: // server error
 			        document.getElementById("research").style.display = "none";
+              document.getElementById("menu").value = "Initial";
+              document.getElementById("keyword").value = "";
+              document.getElementById("search_tab").style.display = "none";
+              document.getElementById("research").style.display = "none";
               window.location.href = "errorPage.html";
               break;
             }
@@ -196,13 +211,17 @@
 			});
 		};
 
-	function ProductDetails(message_container, message_container_body){
+	function ProductDetails(message_container, message_container_body, seller_container, seller_container_body){
 		this.message_container = message_container;
-   		 this.message_container_body = message_container_body;
+   	this.message_container_body = message_container_body;
+		this.seller_container = seller_container;
+		this.seller_container_body = seller_container_body
    	 //Reset function
     this.reset = function (){
      	 this.message_container.style.display = "none";
          this.message_container_body.style.visibility = "hidden";
+		 this.seller_container.style.display = "none";
+		 this.seller_container_body.style.visibility = "hidden";
     }
 		this.show = function(code){
 			makeCall("GET","ProductDetailData?code=" + code, null,
@@ -211,12 +230,13 @@
            			 var message = x.responseText;
             switch (x.status) {
               case 200:
-					//var prod_body = document.getElementById("id_prod_detail_body");
 					message_container_body.innerHTML = "";
+					seller_container_body.innerHTML = "";
 				 	var result = JSON.parse(x.responseText);
 					var details = result[0];
-					var supplier = result[1];
+					var suppliers = result[1];
 					var ranges = result[2];
+					//Create table for product details
 					row = document.createElement("tr");
 	        		destcell = document.createElement("td");
 	       			imgcell = document.createElement("img");
@@ -239,8 +259,87 @@
           			dcell.appendChild(list);
           			row.appendChild(dcell);
           			message_container_body.appendChild(row);
-  		 			message_container.style.display = "initial";
+					//Create table for seller
+      	    suppliers.forEach(function(supplier){
+            newrow = document.createElement("tr");
+            sellername = document.createElement("td");
+            sellername.textContent = supplier.name;
+            newrow.appendChild(sellername);
+            rating = document.createElement("td");
+            rating.textContent = supplier.rating;
+            newrow.appendChild(rating);
+            pricecell = document.createElement("td");
+            pricecell.textContent = ("EUR  	" + supplier.prodPrice);
+            newrow.appendChild(pricecell);
+            freecell = document.createElement("td");
+            freecell.textContent = ("EUR  	" + supplier.freeshipping);
+            newrow.appendChild(freecell);
+            qtacell = document.createElement("td");
+            formcell = document.createElement("form");
+			formcell.setAttribute("method", "POST");
+            field = document.createElement("input");
+            field.setAttribute("type", "number");
+            field.setAttribute("min", "1");
+            field.setAttribute("id", "qta");
+            btncell = document.createElement("input");
+            btncell.setAttribute("type", "button");
+            btncell.setAttribute("value","Add to Cart!");
+            btncell.addEventListener("click", (e) => {
+                  var quantity = document.getElementById("qta");
+                  if(isNaN(quantity.value)){ //Check type is number
+                    showAlert("Please insert a valid value!");
+                  } else if (Math.sign(quantity.value) === 1 ){ // Check qta >= 1
+                      shoppingcart.update(quantity.value, supplier.name, supplier.supplierid, code, supplier.prodPrice, supplier.freeshipping);
+                  } else
+                      showAlert("Please insert a valid value!");
+	     	         }, false);
+            formcell.appendChild(field);
+            formcell.appendChild(btncell);
+            qtacell.appendChild(formcell);
+            newrow.appendChild(qtacell);
+            cellfortable = document.createElement("td");
+              //create subtable for shipping policy
+            policytable = document.createElement("table");
+            newtablerow = document.createElement("tr");
+            head1 = document.createElement("th");
+            head1.textContent = "Minimum Articles";
+            newtablerow.appendChild(head1);
+            head2 = document.createElement("th");
+            head2.textContent = "Maximum Articles";
+            newtablerow.appendChild(head2);
+            head3 = document.createElement("th");
+            head3.textContent = "Shipping Fee";
+            newtablerow.appendChild(head3);
+            policytable.appendChild(newtablerow);
+            ranges.forEach(function(range){
+              if (range.supplierid === supplier.supplierid){
+              newbodyrow = document.createElement("tr");
+              minartcell = document.createElement("td");
+              minartcell.textContent = range.minArt;
+              newbodyrow.appendChild(minartcell);
+              maxartcell = document.createElement("td");
+                if (range.maxArt === 9999999){
+                  maxartcell.textContent = "-";
+                  newbodyrow.appendChild(maxartcell);
+                } else {
+                  maxartcell.textContent = range.maxArt;
+                  newbodyrow.appendChild(maxartcell);
+                }
+              feecell = document.createElement("td");
+              feecell.textContent = range.price;
+              newbodyrow.appendChild(feecell);
+              policytable.appendChild(newbodyrow);
+              cellfortable.appendChild(policytable);
+              }
+            });
+
+            newrow.appendChild(cellfortable);
+            seller_container_body.appendChild(newrow);
+          });
+  		 		message_container.style.display = "initial";
 					message_container_body.style.visibility = "visible";
+					seller_container.style.display = "initial";
+					seller_container_body.style.visibility = "visible";
           			break;
           case 500 :
           window.location.href = "errorPage.html";
@@ -251,6 +350,13 @@
 		};
 	};
 
+
+    function Cart(){
+      this.update = function (qta, supplier_name, supplierid, code, prodPrice, freeshipping){
+		        showAlert(qta + supplier_name + supplierid + code + prodPrice + freeshipping);
+		      };
+    };
+
     function PageOrchestrator (){
       //initial page load
       this.start = function(){
@@ -258,10 +364,10 @@
         personalMessage = new PersonalMessage(document.getElementById ("id_username"));
         personalMessage.show();
 		//Initialize product details
-		productdetails = new ProductDetails(document.getElementById("id_prod_detail"),document.getElementById("id_prod_detail_body"));
+		productdetails = new ProductDetails(document.getElementById("id_prod_detail"),document.getElementById("id_prod_detail_body"), document.getElementById("id_purchase"), document.getElementById("id_purchase_body") );
 		productdetails.reset();
 		//Show recent Prods or in offer
-		  RecentSeenProduct = new RecentSeenProduct(document.getElementById("id_recent_tab"),document.getElementById("id_recent_body") );
+		  RecentSeenProduct = new RecentSeenProduct(document.getElementById("id_recent_tab"),document.getElementById("id_recent_body"));
  	   	  RecentSeenProduct.reset();
 		  RecentSeenProduct.show();
 		//Show Category List
@@ -269,9 +375,10 @@
 		categories.show();
 		document.getElementById("search_tab").style.display = "none";
 		document.getElementById("research").style.display = "none";
+		//Shopping Cart
+		shoppingcart = new Cart();
 
-		
-  		
+
      						 }
   		 };
 
