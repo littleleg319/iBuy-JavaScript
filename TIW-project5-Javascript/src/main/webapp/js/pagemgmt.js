@@ -13,6 +13,10 @@
 	    } // display initial content
 	  }, false);
 
+    var link_cart = document.getElementById("cart_details");
+        link_cart.addEventListener("click", () => {
+            shoppingcart.show();
+        })
 
     function PersonalMessage (message_container){
 			var user = sessionStorage.getItem("user");
@@ -290,6 +294,7 @@
                     showAlert("Please insert a valid value!");
                   } else if (Math.sign(quantity.value) === 1 ){ // Check qta >= 1
                       shoppingcart.update(quantity.value, supplier.name, details.name, supplier.supplierid, code, supplier.prodPrice, supplier.freeshipping);
+					  shoppingcart.show();
                   } else
                       showAlert("Please insert a valid value!");
 	     	         }, false);
@@ -356,63 +361,70 @@
            var shoppingCarts = sessionStorage.getItem("cart");
 		   var shoppingCartsItems = {};
 		   var totalCost;
-		   document.getElementById("id_cart_body").innerHTML='';
 			if (shoppingCarts == null) { //non ho carrelli
 						totalCost = prodPrice * qta;
-						shoppingCartsItems = {
+						shoppingCartsItems = [{
 							"prod_code": code,
 							"price": prodPrice,
 							"qta" : qta,
 							"supid": supplierid,
 							"prod_name": prod_name
-						};
-						shoppingCarts = {
+						}];
+						shoppingCarts = [{
 							"supid" : supplierid,
 							"supname": supplier_name,
 							"ship": freeshipping,
 							"Cost": totalCost,
 							"totalQta": qta
-							};
-					sessionStorage.setItem("cart", shoppingCarts);
-					sessionStorage.setItem("cartItems", shoppingCartsItems);
+            }];
+					var cartJSON = JSON.stringify(shoppingCarts);
+					var cartItemsJSON = JSON.stringify(shoppingCartsItems);
+					sessionStorage.setItem("cart", cartJSON);
+					sessionStorage.setItem("cartItems", cartItemsJSON);
 				};
 			};
 		this.show = function(){
-					var carts = sessionStorage.getItem("cart");
-					var items = sessionStorage.getItem("cartItems");
+					var cartsObj = sessionStorage.getItem("cart");
+					var itemsObj = sessionStorage.getItem("cartItems");
+					var carts = JSON.parse(cartsObj);
+					var items = JSON.parse(itemsObj);
+          var modal = document.getElementById("cartmodal");
+          var span = document.getElementsByClassName("close")[0];
+					document.getElementById("id_cart_body").innerHTML='';
 					carts.forEach(function(cart){
 						 row = document.createElement("tr");
 	        			 sellname = document.createElement("td");
 	       				 sellname.textContent=cart.supname;
 	        			 row.appendChild(sellname);
-						 cellfortable = document.createElement("td");
+						 cellfortableprod = document.createElement("td");
 						//subtable for product list
 						 itemstable = document.createElement("table");
-         				 newtablerow = document.createElement("tr");
-          				 head1 = document.createElement("th");
-            			 head1.textContent = "Product Code";
-            			 newtablerow.appendChild(head1);
-            			 head2 = document.createElement("th");
-           				 head2.textContent = "Product Name";
-           				 newtablerow.appendChild(head2);
-          				 head3 = document.createElement("th");
-           				 head3.textContent = "Qta";
-           				 newtablerow.appendChild(head3);
-           				 itemstable.appendChild(newtablerow);
+         				 newtbrow = document.createElement("tr");
+          				 hd1 = document.createElement("th");
+            			 hd1.textContent = "Product Code";
+            			 newtbrow.appendChild(hd1);
+            			 hd2 = document.createElement("th");
+           				 hd2.textContent = "Product Name";
+           				 newtbrow.appendChild(hd2);
+          				 hd3 = document.createElement("th");
+           				 hd3.textContent = "Qta";
+           				 newtbrow.appendChild(hd3);
+           				 itemstable.appendChild(newtbrow);
            				 items.forEach(function(item){
 							if(item.supid === cart.supid) {
-								newbodyrow = document.createElement("tr");
+								newbdrow = document.createElement("tr");
               					prdcodecell = document.createElement("td");
              					prdcodecell.textContent = item.prod_code;
-              					newbodyrow.appendChild(prdcodecell);
+              					newbdrow.appendChild(prdcodecell);
 								prdnamecell = document.createElement("td");
 								prdnamecell.textContent = item.prod_name;
-								newbodyrow.appendChild(prdnamecell);
+								newbdrow.appendChild(prdnamecell);
 								qtacell = document.createElement("td");
 								qtacell.textContent = item.qta;
-								newbodyrow.appendChild(qtacell); 
-								itemstable.appendChild(newbodyrow);
-								cellfortable.appendChild(itemstable);
+								newbdrow.appendChild(qtacell);
+								itemstable.appendChild(newbdrow);
+								cellfortableprod.appendChild(itemstable);
+                row.appendChild(cellfortableprod);
 								}
 							});
 						//TotalCost cell
@@ -422,7 +434,17 @@
 						shipfeecell = document.createElement("td");
 						shipfeecell.textContent = cart.ship;
 						row.appendChild(shipfeecell);
-						
+            document.getElementById("id_cart_body").appendChild(row);
+            modal.style.display = "block";
+            document.getElementById("id_cart_body").style.visibility = "visible";
+            span.onclick = function() {
+              modal.style.display = "none";
+              }
+              window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                    }
+                  }
 		       // showAlert(qta + supplier_name + supplierid + code + prodPrice + freeshipping);
 		      });
     };

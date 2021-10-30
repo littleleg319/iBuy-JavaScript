@@ -19,7 +19,7 @@
          <a href="#">My Orders</a>
       </li>
 		<li class="cart">
-         <a href="#">
+         <a href="#" id="cart_details">
           <i class="fas fa fa-shopping-cart fa-lg"></i>
           <span class="cart-number" id="cart-items">
             0
@@ -57,7 +57,7 @@
 </div>
 
 		<!-- The Modal -->
-<div id="cart" class="cart_modal">
+<div id="cartmodal" class="cart_modal">
 
   <!-- Modal content -->
   <div class="cart-content">
@@ -70,11 +70,9 @@
 		<thead >		
 			<tr>		
 				<th> Seller Name </th>
-				<th> Rating </th>
-				<th> Price </th>
-				<th> Free Shipping starting from </th>
-				<th> Quantity</th>
-				<th> Shipping cost Details </th>
+				<th> Product List </th>
+				<th> Total Cost </th>
+				<th> Shipping Fee </th>
 			</tr>
 		<tbody id="id_cart_body">
 		</tbody>
