@@ -2,7 +2,7 @@
  * Home Page Orchestrator
  */
 {
-    let productdetails, shoppingcart;
+    let productdetails, shoppingcart, cartseller, cartitem;
     pageOrchestrator = new PageOrchestrator();
 
     window.addEventListener("load", () => {
@@ -289,7 +289,7 @@
                   if(isNaN(quantity.value)){ //Check type is number
                     showAlert("Please insert a valid value!");
                   } else if (Math.sign(quantity.value) === 1 ){ // Check qta >= 1
-                      shoppingcart.update(quantity.value, supplier.name, supplier.supplierid, code, supplier.prodPrice, supplier.freeshipping);
+                      shoppingcart.update(quantity.value, supplier.name, details.name, supplier.supplierid, code, supplier.prodPrice, supplier.freeshipping);
                   } else
                       showAlert("Please insert a valid value!");
 	     	         }, false);
@@ -352,10 +352,81 @@
 
 
     function Cart(){
-      this.update = function (qta, supplier_name, supplierid, code, prodPrice, freeshipping){
-		        showAlert(qta + supplier_name + supplierid + code + prodPrice + freeshipping);
-		      };
+      this.update = function (qta, supplier_name, prod_name, supplierid, code, prodPrice, freeshipping){
+           var shoppingCarts = sessionStorage.getItem("cart");
+		   var shoppingCartsItems = {};
+		   var totalCost;
+		   document.getElementById("id_cart_body").innerHTML='';
+			if (shoppingCarts == null) { //non ho carrelli
+						totalCost = prodPrice * qta;
+						shoppingCartsItems = {
+							"prod_code": code,
+							"price": prodPrice,
+							"qta" : qta,
+							"supid": supplierid,
+							"prod_name": prod_name
+						};
+						shoppingCarts = {
+							"supid" : supplierid,
+							"supname": supplier_name,
+							"ship": freeshipping,
+							"Cost": totalCost,
+							"totalQta": qta
+							};
+					sessionStorage.setItem("cart", shoppingCarts);
+					sessionStorage.setItem("cartItems", shoppingCartsItems);
+				};
+			};
+		this.show = function(){
+					var carts = sessionStorage.getItem("cart");
+					var items = sessionStorage.getItem("cartItems");
+					carts.forEach(function(cart){
+						 row = document.createElement("tr");
+	        			 sellname = document.createElement("td");
+	       				 sellname.textContent=cart.supname;
+	        			 row.appendChild(sellname);
+						 cellfortable = document.createElement("td");
+						//subtable for product list
+						 itemstable = document.createElement("table");
+         				 newtablerow = document.createElement("tr");
+          				 head1 = document.createElement("th");
+            			 head1.textContent = "Product Code";
+            			 newtablerow.appendChild(head1);
+            			 head2 = document.createElement("th");
+           				 head2.textContent = "Product Name";
+           				 newtablerow.appendChild(head2);
+          				 head3 = document.createElement("th");
+           				 head3.textContent = "Qta";
+           				 newtablerow.appendChild(head3);
+           				 itemstable.appendChild(newtablerow);
+           				 items.forEach(function(item){
+							if(item.supid === cart.supid) {
+								newbodyrow = document.createElement("tr");
+              					prdcodecell = document.createElement("td");
+             					prdcodecell.textContent = item.prod_code;
+              					newbodyrow.appendChild(prdcodecell);
+								prdnamecell = document.createElement("td");
+								prdnamecell.textContent = item.prod_name;
+								newbodyrow.appendChild(prdnamecell);
+								qtacell = document.createElement("td");
+								qtacell.textContent = item.qta;
+								newbodyrow.appendChild(qtacell); 
+								itemstable.appendChild(newbodyrow);
+								cellfortable.appendChild(itemstable);
+								}
+							});
+						//TotalCost cell
+						costcell = document.createElement("td");
+						costcell.textContent = cart.Cost;
+						row.appendChild(costcell);
+						shipfeecell = document.createElement("td");
+						shipfeecell.textContent = cart.ship;
+						row.appendChild(shipfeecell);
+						
+		       // showAlert(qta + supplier_name + supplierid + code + prodPrice + freeshipping);
+		      });
     };
+};
 
     function PageOrchestrator (){
       //initial page load
@@ -377,9 +448,7 @@
 		document.getElementById("research").style.display = "none";
 		//Shopping Cart
 		shoppingcart = new Cart();
-
-
      						 }
   		 };
 
-	}
+	};

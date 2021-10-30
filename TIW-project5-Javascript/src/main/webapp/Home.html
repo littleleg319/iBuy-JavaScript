@@ -5,6 +5,7 @@
 <title>iBuy Shopping Center</title>
 <script src="./js/utilities.js" charset="utf-8" defer></script>
 <script src="./js/pagemgmt.js" charset="utf-8" defer></script>
+<script src="./js/logout.js" charset="utf-8" defer></script>
 <link rel="stylesheet" type="text/css" media="all" href="./css/home.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
@@ -13,7 +14,7 @@
 	
 	<ul>
 		 <li class="welcome"> Welcome back <span id="id_username"></span>! Enjoy your shopping!</li>
-		<li class="logout"><a href="Logout" class="logout">Logout</a></li>
+		<li class="logout"><a href="#" id="logout" onclick="logout()" class="logout">Logout</a></li>
 		 		<li class="orders">
          <a href="#">My Orders</a>
       </li>
@@ -54,6 +55,33 @@
    </div>
   </div>
 </div>
+
+		<!-- The Modal -->
+<div id="cart" class="cart_modal">
+
+  <!-- Modal content -->
+  <div class="cart-content">
+    <div class="cart-header">
+      <span class="close">&times;</span>
+      <h2>Your Shopping Cart</h2>
+    </div>
+   <div class="cart-body">
+      <table id="id_cart">
+		<thead >		
+			<tr>		
+				<th> Seller Name </th>
+				<th> Rating </th>
+				<th> Price </th>
+				<th> Free Shipping starting from </th>
+				<th> Quantity</th>
+				<th> Shipping cost Details </th>
+			</tr>
+		<tbody id="id_cart_body">
+		</tbody>
+	</table>
+   </div>
+   </div>
+  </div>
 
 	<table id="id_prod_detail">
 		<tbody id="id_prod_detail_body">
