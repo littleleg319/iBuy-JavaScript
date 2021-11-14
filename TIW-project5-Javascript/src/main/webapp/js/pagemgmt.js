@@ -294,7 +294,7 @@
                     showAlert("Please insert a valid value!");
                   } else if (Math.sign(quantity) === 1 ){ // Check qta >= 1
                       shoppingcart.update(quantity, supplier.name, details.name, supplier.supplierid, code, supplier.prodPrice, supplier.freeshipping);
-					  shoppingcart.show();
+
                   } else
                       showAlert("Please insert a valid value!");
 	     	         }, false);
@@ -361,30 +361,75 @@
            var shoppingCarts = sessionStorage.getItem("cart");
 		       var shoppingCartsItems = sessionStorage.getItem("cartItems");
 		       var totalCost;
+           var shippingCost;
 			         if (shoppingCarts == null || shoppingCartsItems == null) { //non ho carrelli
 						            totalCost = prodPrice * qta;
-						            shoppingCartsItems = [{
-							                   "prod_code": code,
-							                   "price": prodPrice,
-							                   "qta" : qta,
-							                   "supid": supplierid,
-							                   "prod_name": prod_name
-						                     }];
-						           shoppingCarts = [{
-							                  "supid" : supplierid,
-							                  "supname": supplier_name,
-							                  "ship": freeshipping,
-							                  "Cost": totalCost,
-							                  "totalQta": qta,
-                                "freeship": freeshipping
-                                 }];
-					var cartJSON = JSON.stringify(shoppingCarts);
-					var cartItemsJSON = JSON.stringify(shoppingCartsItems);
-					sessionStorage.setItem("cart", cartJSON);
-					sessionStorage.setItem("cartItems", cartItemsJSON);
-          countitem = parseInt(countitem, 10) + parseInt(qta, 10);
-          document.getElementById("cart-items").innerHTML = '';
-          document.getElementById("cart-items").innerHTML = countitem;
+                        if (totalCost >= freeshipping){
+                          shippingCost = 0;
+                          shoppingCartsItems = [{
+                                   "prod_code": code,
+                                   "price": prodPrice,
+                                   "qta" : qta,
+                                   "supid": supplierid,
+                                   "prod_name": prod_name
+                                   }];
+                         shoppingCarts = [{
+                                  "supid" : supplierid,
+                                  "supname": supplier_name,
+                                  "ship": shippingCost,
+                                  "Cost": totalCost,
+                                  "totalQta": qta,
+                                  "freeship": freeshipping
+                                   }];
+                        var cartJSON = JSON.stringify(shoppingCarts);
+                        var cartItemsJSON = JSON.stringify(shoppingCartsItems);
+                        sessionStorage.setItem("cart", cartJSON);
+                        sessionStorage.setItem("cartItems", cartItemsJSON);
+                        countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+                        document.getElementById("cart-items").innerHTML = '';
+                        document.getElementById("cart-items").innerHTML = countitem;
+                        document.getElementById("qta").value='';
+                        } else {
+                          makeCall("GET","ShippingFeeData?number=" + qta + "&supid=" + supplierid, null, function(x){
+                  				      if (x.readyState == XMLHttpRequest.DONE) {
+                             			 var message = x.responseText;
+                                   switch (x.status) {
+                                     case 200:
+                                      var result = JSON.parse(x.responseText);
+                                      shippingCost = result;
+                                      shoppingCartsItems = [{
+            							                   "prod_code": code,
+            							                   "price": prodPrice,
+            							                   "qta" : qta,
+            							                   "supid": supplierid,
+            							                   "prod_name": prod_name
+            						                     }];
+            						              shoppingCarts = [{
+            							                  "supid" : supplierid,
+            							                  "supname": supplier_name,
+            							                  "ship": shippingCost,
+            							                  "Cost": totalCost,
+            							                  "totalQta": qta,
+                                            "freeship": freeshipping
+                                             }];
+            					               var cartJSON = JSON.stringify(shoppingCarts);
+            					               var cartItemsJSON = JSON.stringify(shoppingCartsItems);
+            					            sessionStorage.setItem("cart", cartJSON);
+            					            sessionStorage.setItem("cartItems", cartItemsJSON);
+                                  countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+                                  document.getElementById("cart-items").innerHTML = '';
+                                  document.getElementById("cart-items").innerHTML = countitem;
+                                  document.getElementById("qta").value='';
+                                  shoppingcart.show();
+                                  break;
+                              case 500 :
+                                  window.location.href = "errorPage.html";
+                                  break;
+                                  }
+                                }
+                              });
+                        }
+
 				} else { //carrello già esistente
           var incart = false;
           var initem = false;
@@ -406,37 +451,42 @@
                if (cartsSession.supid === supplierid){
                itemsSessions.forEach(function(itemSession){
                  if (itemSession.prod_code === code){
-                      itemSession.qta = itemSession.qta + qta;
+                      itemSession.qta = parseInt(itemSession.qta, 10) + parseInt(qta, 10);
                  };
                });
                };
              });
            } else if (incart && !initem){ //ho già un carrello del fornitore ma non lo stesso item
-                    var  newItem = [{
+                    var  newItem = {
                           "prod_code": code,
                           "price": prodPrice,
                           "qta" : qta,
                           "supid": supplierid,
                           "prod_name": prod_name
-                          }];
+                          };
               itemsSessions.push(newItem);
               cartsSessions.forEach(function(cartsSession){
                 if (cartsSession.supid === supplierid){
                   cartsSession.totalQta = parseInt(cartsSession.totalQta, 10) + parseInt(qta, 10);
            };
         });
-      }; //mancano carrello senza qst item, e carrello ma di altri
+      }; //mancano carrello ma di altri
             //aggiorno dati
             cartsSessions.forEach(function(cartSession){
               let articles = 0;
-              let totalPrice = 0;
+              let totalPrice = 0.00;
                 itemsSessions.forEach(function(itemSession){
+                  var itmqta = parseInt(itemSession.qta, 10);
+                  var itmprice = parseFloat(itemSession.price).toFixed(2);
+                  var itmprice = itmqta * itmprice;
                   if (cartSession.supid === itemSession.supid){
                     articles = parseInt(articles, 10) + parseInt(itemSession.qta, 10);
-                    totalPrice = parseInt(totalPrice, 10) + (parseInt(itemSession.qta, 10) * parseInt(itemSession.price, 10));
+                    totalPrice = parseFloat(totalPrice) + itmprice;
                     cartSession.Cost = totalPrice;
                     cartSession.totalQta = articles;
-                    if(totalPrice < cartSession.freeship){
+                  };
+                });
+                    if (totalPrice < cartSession.freeship){
                       makeCall("GET","ShippingFeeData?number=" + articles + "&supid=" + supplierid, null,
               			function(x){
               				if (x.readyState == XMLHttpRequest.DONE) {
@@ -452,10 +502,17 @@
                                 countitem = parseInt(countitem, 10) + parseInt(qta, 10);
                                 document.getElementById("cart-items").innerHTML = '';
                                 document.getElementById("cart-items").innerHTML = countitem;
+                                document.getElementById("qta").value='';
+                                shoppingcart.show();
+                                break;
+                              case 500:
+                                window.location.href = "errorPage.html";
+                                break;
                               }
                             }
-                          },false);
+                          });
                     } else {
+                      cartSession.ship = 0;
                       var cartupd = JSON.stringify(cartsSessions);
                       var cartItemsupd = JSON.stringify(itemsSessions);
                       sessionStorage.setItem("cart", cartupd);
@@ -463,12 +520,11 @@
                       countitem = parseInt(countitem, 10) + parseInt(qta, 10);
                       document.getElementById("cart-items").innerHTML = '';
                       document.getElementById("cart-items").innerHTML = countitem;
+                      document.getElementById("qta").value='';
+                      shoppingcart.show();
                     }
-                  };
-                });
-            })
-
-			};
+                  });
+                };
     };
 		this.show = function(){
 					var cartsObj = sessionStorage.getItem("cart");
@@ -509,10 +565,12 @@
 								             qtacell = document.createElement("td");
 								             qtacell.textContent = item.qta;
 								             newbdrow.appendChild(qtacell);
-								             itemstable.appendChild(newbdrow);
-							               cellfortableprod.appendChild(itemstable);
-                             row.appendChild(cellfortableprod);
+                          //   newtbrow.appendChild(newbdrow);
+                             itemstable.appendChild(newbdrow);
+
 								}
+                cellfortableprod.appendChild(itemstable);
+                row.appendChild(cellfortableprod);
 							});
 						//TotalCost cell
 						costcell = document.createElement("td");
