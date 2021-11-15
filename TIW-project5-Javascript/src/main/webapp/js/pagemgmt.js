@@ -335,11 +335,24 @@
               newbodyrow.appendChild(feecell);
               policytable.appendChild(newbodyrow);
               cellfortable.appendChild(policytable);
+              newrow.appendChild(cellfortable);
               }
             });
-
-            newrow.appendChild(cellfortable);
-            seller_container_body.appendChild(newrow);
+            var c = sessionStorage.getItem("cart");
+            var cjs = JSON.parse(c);
+            if (c == null){
+              seller_container_body.appendChild(newrow);
+            } else {
+              cjs.forEach(function(cj){
+                if (cj.supid === supplier.supplierid){
+                obj = document.createElement("td");
+                obj.textContent = ("You already have " + cj.totalQta + " items of this seller in your cart" );
+                obj.setAttribute("id","obejcts");
+                newrow.appendChild(obj);
+              }
+            });
+              seller_container_body.appendChild(newrow);
+            };
           });
   		 		message_container.style.display = "initial";
 					message_container_body.style.visibility = "visible";
@@ -456,6 +469,7 @@
                });
                };
              });
+               countitem = parseInt(countitem, 10) + parseInt(qta, 10);
            } else if (incart && !initem){ //ho già un carrello del fornitore ma non lo stesso item
                     var  newItem = {
                           "prod_code": code,
@@ -470,7 +484,47 @@
                   cartsSession.totalQta = parseInt(cartsSession.totalQta, 10) + parseInt(qta, 10);
            };
         });
-      }; //mancano carrello ma di altri
+          countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+      } else if (!incart && !initem){ //non ho il carrello per questo fornitore
+        var newItemSup = {
+                 "prod_code": code,
+                 "price": prodPrice,
+                 "qta" : qta,
+                 "supid": supplierid,
+                 "prod_name": prod_name
+                 };
+       var newCartSup = {
+                "supid" : supplierid,
+                "supname": supplier_name,
+                "ship": shippingCost,
+                "Cost": totalCost,
+                "totalQta": qta,
+                "freeship": freeshipping
+                 };
+
+                 itemsSessions.push(newItemSup);
+                 cartsSessions.push(newCartSup);
+                 countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+      } else if (!incart && initem){ //ho lo stesso item ma di un altro fornitore
+                    var newCartSup = {
+                   "supid" : supplierid,
+                   "supname": supplier_name,
+                   "ship": shippingCost,
+                   "Cost": totalCost,
+                   "totalQta": qta,
+                   "freeship": freeshipping
+                    };
+          var newItemSup = {
+                             "prod_code": code,
+                             "price": prodPrice,
+                             "qta" : qta,
+                             "supid": supplierid,
+                             "prod_name": prod_name
+                             };
+                   itemsSessions.push(newItemSup);
+                   cartsSessions.push(newCartSup);
+                   countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+      };
             //aggiorno dati
             cartsSessions.forEach(function(cartSession){
               let articles = 0;
@@ -499,7 +553,6 @@
                                 var cartItemsupd = JSON.stringify(itemsSessions);
                                 sessionStorage.setItem("cart", cartupd);
                                 sessionStorage.setItem("cartItems", cartItemsupd);
-                                countitem = parseInt(countitem, 10) + parseInt(qta, 10);
                                 document.getElementById("cart-items").innerHTML = '';
                                 document.getElementById("cart-items").innerHTML = countitem;
                                 document.getElementById("qta").value='';
@@ -517,7 +570,6 @@
                       var cartItemsupd = JSON.stringify(itemsSessions);
                       sessionStorage.setItem("cart", cartupd);
                       sessionStorage.setItem("cartItems", cartItemsupd);
-                      countitem = parseInt(countitem, 10) + parseInt(qta, 10);
                       document.getElementById("cart-items").innerHTML = '';
                       document.getElementById("cart-items").innerHTML = countitem;
                       document.getElementById("qta").value='';
