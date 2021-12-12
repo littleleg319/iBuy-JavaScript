@@ -294,7 +294,7 @@
                     showAlert("Please insert a valid value!");
                   } else if (Math.sign(quantity) === 1 ){ // Check qta >= 1
                       shoppingcart.update(quantity, supplier.name, details.name, supplier.supplierid, code, supplier.prodPrice, supplier.freeshipping);
-
+                      e.target.closest("form").elements.namedItem("qta").value = '';
                   } else
                       showAlert("Please insert a valid value!");
 	     	         }, false);
@@ -402,6 +402,7 @@
                         document.getElementById("cart-items").innerHTML = '';
                         document.getElementById("cart-items").innerHTML = countitem;
                         document.getElementById("qta").value='';
+						            shoppingcart.show();
                         } else {
                           makeCall("GET","ShippingFeeData?number=" + qta + "&supid=" + supplierid, null, function(x){
                   				      if (x.readyState == XMLHttpRequest.DONE) {
@@ -434,6 +435,7 @@
                                   document.getElementById("cart-items").innerHTML = countitem;
                                   document.getElementById("qta").value='';
                                   shoppingcart.show();
+                                  productdetails.show(code);
                                   break;
                               case 500 :
                                   window.location.href = "errorPage.html";
@@ -451,7 +453,7 @@
           cartsSessions.forEach(function(cartsearch){
             if (cartsearch.supid === supplierid){
             itemsSessions.forEach(function(itemSession){
-              if (itemSession.prod_code === code){
+              if (itemSession.prod_code === code && itemSession.supid === supplierid){
                 initem = true;
               };
             });
@@ -463,13 +465,56 @@
              cartsSessions.forEach(function(cartsSession){
                if (cartsSession.supid === supplierid){
                itemsSessions.forEach(function(itemSession){
-                 if (itemSession.prod_code === code){
+                 if (itemSession.prod_code === code && itemSession.supid === supplierid){
                       itemSession.qta = parseInt(itemSession.qta, 10) + parseInt(qta, 10);
-                 };
+                      cartsSession.totalQta = parseInt(cartsSession.totalQta, 10) + parseInt(qta, 10);
+                      var price = prodPrice * qta;
+                      var costupdated = parseFloat(cartsSession.Cost) + parseFloat(price);
+                      cartsSession.Cost = parseFloat(costupdated).toFixed(2);
+                      if (cartsSession.Cost < cartsSession.freeship){
+                        makeCall("GET","ShippingFeeData?number=" + cartsSession.totalQta + "&supid=" + cartsSession.supid, null,
+                      function(x){
+                        if (x.readyState == XMLHttpRequest.DONE) {
+                                 var message = x.responseText;
+                            switch (x.status) {
+                              case 200:
+                                  var result = JSON.parse(message);
+                                  cartsSession.ship = result;
+                                  var cartupd = JSON.stringify(cartsSessions);
+                                  var cartItemsupd = JSON.stringify(itemsSessions);
+                                  sessionStorage.setItem("cart", cartupd);
+                                  sessionStorage.setItem("cartItems", cartItemsupd);
+                                  countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+                                  document.getElementById("cart-items").innerHTML = '';
+                                  document.getElementById("cart-items").innerHTML = countitem;
+                                  document.getElementById("qta").value='';
+                                  shoppingcart.show();
+                                  productdetails.show(code);
+                                  break;
+                                case 500:
+                                  window.location.href = "errorPage.html";
+                                  break;
+                                }
+                              }
+                            });
+                      } else {
+                        cartsSession.ship = 0;
+                        var cartupd = JSON.stringify(cartsSessions);
+                        var cartItemsupd = JSON.stringify(itemsSessions);
+                        sessionStorage.setItem("cart", cartupd);
+                        sessionStorage.setItem("cartItems", cartItemsupd);
+                        countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+                        document.getElementById("cart-items").innerHTML = '';
+                        document.getElementById("cart-items").innerHTML = countitem;
+                        document.getElementById("qta").value='';
+                        shoppingcart.show();
+                        productdetails.show(code);
+                        }
+                    };
                });
                };
              });
-               countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+
            } else if (incart && !initem){ //ho già un carrello del fornitore ma non lo stesso item
                     var  newItem = {
                           "prod_code": code,
@@ -482,101 +527,126 @@
               cartsSessions.forEach(function(cartsSession){
                 if (cartsSession.supid === supplierid){
                   cartsSession.totalQta = parseInt(cartsSession.totalQta, 10) + parseInt(qta, 10);
+                  var price = prodPrice * qta;
+                  var costupdated = parseFloat(cartsSession.Cost) + parseFloat(price);
+                  cartsSession.Cost = parseFloat(costupdated).toFixed(2);
+                  if (cartsSession.Cost < cartsSession.freeship){
+                    makeCall("GET","ShippingFeeData?number=" + cartsSession.totalQta + "&supid=" + cartsSession.supid, null,
+                  function(x){
+                    if (x.readyState == XMLHttpRequest.DONE) {
+                             var message = x.responseText;
+                        switch (x.status) {
+                          case 200:
+                              var result = JSON.parse(message);
+                              cartsSession.ship = result;
+                              var cartupd = JSON.stringify(cartsSessions);
+                              var cartItemsupd = JSON.stringify(itemsSessions);
+                              sessionStorage.setItem("cart", cartupd);
+                              sessionStorage.setItem("cartItems", cartItemsupd);
+                              countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+                              document.getElementById("cart-items").innerHTML = '';
+                              document.getElementById("cart-items").innerHTML = countitem;
+                              document.getElementById("qta").value='';
+                              shoppingcart.show();
+                              productdetails.show(code);
+                              break;
+                            case 500:
+                              window.location.href = "errorPage.html";
+                              break;
+                            }
+                          }
+                        });
+                  } else {
+                    cartsSession.ship = 0;
+                    var cartupd = JSON.stringify(cartsSessions);
+                    var cartItemsupd = JSON.stringify(itemsSessions);
+                    sessionStorage.setItem("cart", cartupd);
+                    sessionStorage.setItem("cartItems", cartItemsupd);
+                    countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+                    document.getElementById("cart-items").innerHTML = '';
+                    document.getElementById("cart-items").innerHTML = countitem;
+                    document.getElementById("qta").value='';
+                    shoppingcart.show();
+                    productdetails.show(code);
+                    }
            };
         });
-          countitem = parseInt(countitem, 10) + parseInt(qta, 10);
       } else if (!incart && !initem){ //non ho il carrello per questo fornitore
-        var newItemSup = {
-                 "prod_code": code,
-                 "price": prodPrice,
-                 "qta" : qta,
-                 "supid": supplierid,
-                 "prod_name": prod_name
-                 };
-       var newCartSup = {
-                "supid" : supplierid,
-                "supname": supplier_name,
-                "ship": shippingCost,
-                "Cost": totalCost,
-                "totalQta": qta,
-                "freeship": freeshipping
-                 };
-
-                 itemsSessions.push(newItemSup);
-                 cartsSessions.push(newCartSup);
-                 countitem = parseInt(countitem, 10) + parseInt(qta, 10);
-      } else if (!incart && initem){ //ho lo stesso item ma di un altro fornitore
-                    var newCartSup = {
-                   "supid" : supplierid,
-                   "supname": supplier_name,
-                   "ship": shippingCost,
-                   "Cost": totalCost,
-                   "totalQta": qta,
-                   "freeship": freeshipping
-                    };
-          var newItemSup = {
-                             "prod_code": code,
-                             "price": prodPrice,
-                             "qta" : qta,
-                             "supid": supplierid,
-                             "prod_name": prod_name
-                             };
-                   itemsSessions.push(newItemSup);
-                   cartsSessions.push(newCartSup);
+         var  totalCost = prodPrice * qta;
+         if (totalCost < freeshipping){
+                   makeCall("GET","ShippingFeeData?number=" + qta + "&supid=" + supplierid, null,
+                 function(x){
+                   if (x.readyState == XMLHttpRequest.DONE) {
+                            var message = x.responseText;
+                       switch (x.status) {
+                         case 200:
+                             var result = JSON.parse(message);
+                             var newItemSup = {
+                                      "prod_code": code,
+                                      "price": prodPrice,
+                                      "qta" : qta,
+                                      "supid": supplierid,
+                                      "prod_name": prod_name
+                                      };
+                            var newCartSup = {
+                                     "supid" : supplierid,
+                                     "supname": supplier_name,
+                                     "ship": result,
+                                     "Cost": totalCost,
+                                     "totalQta": qta,
+                                     "freeship": freeshipping
+                                      };
+                             itemsSessions.push(newItemSup);
+                             cartsSessions.push(newCartSup);
+                             var cartupd = JSON.stringify(cartsSessions);
+                             var cartItemsupd = JSON.stringify(itemsSessions);
+                             sessionStorage.setItem("cart", cartupd);
+                             sessionStorage.setItem("cartItems", cartItemsupd);
+                             countitem = parseInt(countitem, 10) + parseInt(qta, 10);
+                             document.getElementById("cart-items").innerHTML = '';
+                             document.getElementById("cart-items").innerHTML = countitem;
+                             document.getElementById("qta").value='';
+                             shoppingcart.show();
+                             productdetails.show(code);
+                             break;
+                           case 500:
+                             window.location.href = "errorPage.html";
+                             break;
+                           }
+                         }
+                       });
+                 } else {
+                   var shippingCost = 0;
+                   var newItemSup = {
+                            "prod_code": code,
+                            "price": prodPrice,
+                            "qta" : qta,
+                            "supid": supplierid,
+                            "prod_name": prod_name
+                            };
+                  var newCartSup = {
+                           "supid" : supplierid,
+                           "supname": supplier_name,
+                           "ship": shippingCost,
+                           "Cost": totalCost,
+                           "totalQta": qta,
+                           "freeship": freeshipping
+                            };
+                   var cartupd = JSON.stringify(cartsSessions);
+                   var cartItemsupd = JSON.stringify(itemsSessions);
+                   sessionStorage.setItem("cart", cartupd);
+                   sessionStorage.setItem("cartItems", cartItemsupd);
                    countitem = parseInt(countitem, 10) + parseInt(qta, 10);
-      };
-            //aggiorno dati
-            cartsSessions.forEach(function(cartSession){
-              let articles = 0;
-              let totalPrice = 0.00;
-                itemsSessions.forEach(function(itemSession){
-                  var itmqta = parseInt(itemSession.qta, 10);
-                  var itmprice = parseFloat(itemSession.price).toFixed(2);
-                  var itmprice = itmqta * itmprice;
-                  if (cartSession.supid === itemSession.supid){
-                    articles = parseInt(articles, 10) + parseInt(itemSession.qta, 10);
-                    totalPrice = parseFloat(totalPrice) + itmprice;
-                    cartSession.Cost = totalPrice;
-                    cartSession.totalQta = articles;
-                  };
-                });
-                    if (totalPrice < cartSession.freeship){
-                      makeCall("GET","ShippingFeeData?number=" + articles + "&supid=" + supplierid, null,
-              			function(x){
-              				if (x.readyState == XMLHttpRequest.DONE) {
-                         			 var message = x.responseText;
-                          switch (x.status) {
-                            case 200:
-                                var result = JSON.parse(x.responseText);
-                                cartSession.ship = result;
-                                var cartupd = JSON.stringify(cartsSessions);
-                                var cartItemsupd = JSON.stringify(itemsSessions);
-                                sessionStorage.setItem("cart", cartupd);
-                                sessionStorage.setItem("cartItems", cartItemsupd);
-                                document.getElementById("cart-items").innerHTML = '';
-                                document.getElementById("cart-items").innerHTML = countitem;
-                                document.getElementById("qta").value='';
-                                shoppingcart.show();
-                                break;
-                              case 500:
-                                window.location.href = "errorPage.html";
-                                break;
-                              }
-                            }
-                          });
-                    } else {
-                      cartSession.ship = 0;
-                      var cartupd = JSON.stringify(cartsSessions);
-                      var cartItemsupd = JSON.stringify(itemsSessions);
-                      sessionStorage.setItem("cart", cartupd);
-                      sessionStorage.setItem("cartItems", cartItemsupd);
-                      document.getElementById("cart-items").innerHTML = '';
-                      document.getElementById("cart-items").innerHTML = countitem;
-                      document.getElementById("qta").value='';
-                      shoppingcart.show();
-                    }
-                  });
+                   document.getElementById("cart-items").innerHTML = '';
+                   document.getElementById("cart-items").innerHTML = countitem;
+                   document.getElementById("qta").value='';
+                   shoppingcart.show();
+                   productdetails.show(code);
+                   }
+
+      } ;
                 };
+
     };
 		this.show = function(){
 					var cartsObj = sessionStorage.getItem("cart");
@@ -617,8 +687,7 @@
 								             qtacell = document.createElement("td");
 								             qtacell.textContent = item.qta;
 								             newbdrow.appendChild(qtacell);
-                          //   newtbrow.appendChild(newbdrow);
-                             itemstable.appendChild(newbdrow);
+				                             itemstable.appendChild(newbdrow);
 
 								}
                 cellfortableprod.appendChild(itemstable);
@@ -642,7 +711,73 @@
                     modal.style.display = "none";
                     }
                   }
-		       // showAlert(qta + supplier_name + supplierid + code + prodPrice + freeshipping);
+		      });
+    };
+    this.showSupplier = function(supplierid){
+					var cartsObj = sessionStorage.getItem("cart");
+					var itemsObj = sessionStorage.getItem("cartItems");
+					var carts = JSON.parse(cartsObj);
+					var items = JSON.parse(itemsObj);
+          var modal = document.getElementById("id01");
+          var span = document.getElementsByClassName("close")[0];
+					document.getElementById("id_cart_body").innerHTML='';
+					carts.forEach(function(cart){
+            if (cart.supid === supplierid){
+						 row = document.createElement("tr");
+	        			 sellname = document.createElement("td");
+	       				 sellname.textContent=cart.supname;
+	        			 row.appendChild(sellname);
+						 cellfortableprod = document.createElement("td");
+						//subtable for product list
+						 itemstable = document.createElement("table");
+         				 newtbrow = document.createElement("tr");
+          				 hd1 = document.createElement("th");
+            			 hd1.textContent = "Product Code";
+            			 newtbrow.appendChild(hd1);
+            			 hd2 = document.createElement("th");
+           				 hd2.textContent = "Product Name";
+           				 newtbrow.appendChild(hd2);
+          				 hd3 = document.createElement("th");
+           				 hd3.textContent = "Qta";
+           				 newtbrow.appendChild(hd3);
+           				 itemstable.appendChild(newtbrow);
+           				 items.forEach(function(item){
+							if(item.supid === cart.supid) {
+								        newbdrow = document.createElement("tr");
+              					     prdcodecell = document.createElement("td");
+             					       prdcodecell.textContent = item.prod_code;
+              					     newbdrow.appendChild(prdcodecell);
+								             prdnamecell = document.createElement("td");
+								             prdnamecell.textContent = item.prod_name;
+								             newbdrow.appendChild(prdnamecell);
+								             qtacell = document.createElement("td");
+								             qtacell.textContent = item.qta;
+								             newbdrow.appendChild(qtacell);
+				                             itemstable.appendChild(newbdrow);
+
+								}
+                cellfortableprod.appendChild(itemstable);
+                row.appendChild(cellfortableprod);
+							});
+						//TotalCost cell
+						costcell = document.createElement("td");
+						costcell.textContent = cart.Cost;
+						row.appendChild(costcell);
+						shipfeecell = document.createElement("td");
+						shipfeecell.textContent = cart.ship;
+						row.appendChild(shipfeecell);
+            document.getElementById("id_cart_body").appendChild(row);
+            modal.style.display = "block";
+            document.getElementById("id_cart_body").style.visibility = "visible";
+            span.onclick = function() {
+              modal.style.display = "none";
+              }
+              window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                    }
+                  }
+              }
 		      });
     };
 };
