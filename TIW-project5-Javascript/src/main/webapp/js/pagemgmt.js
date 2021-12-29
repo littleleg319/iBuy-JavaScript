@@ -2,7 +2,7 @@
  * Home Page Orchestrator
  */
 {
-    let productdetails, shoppingcart, cartseller, cartitem, countitem;
+    let productdetails, shoppingcart, odr, cartitem, countitem;
     pageOrchestrator = new PageOrchestrator();
 
     window.addEventListener("load", () => {
@@ -12,6 +12,14 @@
 	      pageOrchestrator.start(); // initialize the components
 	    } // display initial content
 	  }, false);
+
+    window.addEventListener("reload", () => {
+      if (sessionStorage.getItem("user") == null) {
+	      window.location.href = "default.html";
+	    } else {
+	      pageOrchestrator.refresh(); //
+	    } // display initial content
+    }, false);
 
     var link_cart = document.getElementById("cart_details");
         link_cart.addEventListener("click", () => {
@@ -280,7 +288,7 @@
             newrow.appendChild(freecell);
             qtacell = document.createElement("td");
             formcell = document.createElement("form");
-			formcell.setAttribute("method", "POST");
+		 	      formcell.setAttribute("method", "POST");
             field = document.createElement("input");
             field.setAttribute("type", "number");
             field.setAttribute("min", "1");
@@ -346,8 +354,20 @@
               cjs.forEach(function(cj){
                 if (cj.supid === supplier.supplierid){
                 obj = document.createElement("td");
-                obj.textContent = ("You already have " + cj.totalQta + " items of this seller in your cart" );
                 obj.setAttribute("id","obejcts");
+                obj.textContent = ("Items of this seller in your cart:  ");
+                formitm = document.createElement("form");
+    		 	      formitm.setAttribute("method", "POST");
+                itm = document.createElement("input");
+                itm.setAttribute("type", "button")
+                itm.setAttribute("id", "itemCartSup");
+                itm.setAttribute("value", cj.totalQta )
+                itm.setAttribute("supplierid", cj.supid);
+                itm.addEventListener("pointerover", (e) => {
+                  shoppingcart.showSupplier(e.target.getAttribute("supplierid"));
+                });
+                formitm.appendChild(itm);
+                obj.appendChild(formitm);
                 newrow.appendChild(obj);
               }
             });
@@ -368,8 +388,52 @@
 		};
 	};
 
+    function Orders(){
+      this.create = function(form){
+        makeCall("POST","OrdersData", form,
+      function(x){
+        if (x.readyState == XMLHttpRequest.DONE){
+          var message = x.responseText;
+          switch (x.status){
+            case 200:
+            var result = JSON.parse(x.responseText);
+            var cart = result[0];
+            var items = result[1];
+            shoppingcart.remove(cart, items);
+            showAlert("Order successfully completed! Thank you!");
+            window.location.href = "Home.html";
+            break;
+            case 500:
+              window.location.href = "errorPage.html";
+              break;
+          }
+        }
+      });
+    }
+}
+
 
     function Cart(){
+      this.remove = function (cart, items){
+        var shoppingCarts = sessionStorage.getItem("cart");
+        var shoppingCartsItems = sessionStorage.getItem("cartItems");
+        var carts = JSON.parse(shoppingCarts);
+        var items = JSON.parse(shoppingCartsItems);
+        if (carts.length === 1){ //ho un solo carrello
+          window.sessionStorage.removeItem('cart');
+          window.sessionStorage.removeItem('cartItems');
+        } else { //ho altri oggetti nel carrello
+            let pos = carts.indexOf(cart);
+            carts.splice(pos, 1);
+            let positm = items.indexOf(items);
+            let number = items.lenght;
+            items.splice(positm, number);
+            var cartupdate = JSON.stringify(carts);
+            var itmupdate = JSON.stringify(items);
+            sessionStorage.setItem("cart", cartupdate);
+            sessionStorage.setItem("cartItems", itmupdate);
+        }
+      }
       this.update = function (qta, supplier_name, prod_name, supplierid, code, prodPrice, freeshipping){
            var shoppingCarts = sessionStorage.getItem("cart");
 		       var shoppingCartsItems = sessionStorage.getItem("cartItems");
@@ -632,8 +696,8 @@
                            "totalQta": qta,
                            "freeship": freeshipping
                             };
-                   var cartupd = JSON.stringify(cartsSessions);
-                   var cartItemsupd = JSON.stringify(itemsSessions);
+                   var cartupd = JSON.stringify(newCartSup);
+                   var cartItemsupd = JSON.stringify(newItemSup);
                    sessionStorage.setItem("cart", cartupd);
                    sessionStorage.setItem("cartItems", cartItemsupd);
                    countitem = parseInt(countitem, 10) + parseInt(qta, 10);
@@ -700,6 +764,50 @@
 						shipfeecell = document.createElement("td");
 						shipfeecell.textContent = cart.ship;
 						row.appendChild(shipfeecell);
+            //Checkout
+            var itmlist = [];
+            var count = 0;
+            items.forEach(function(item){
+              if (item.supid === cart.supid){
+                itmlist[count] = item;
+                count ++;
+              }
+            });
+            ckout = document.createElement("td");
+            ckout.setAttribute("class", "nocolor");
+            formitm = document.createElement("form");
+            formitm.setAttribute("method", "POST");
+            formitm.setAttribute("action", "#");
+            itm = document.createElement("input");
+            itm.setAttribute("type", "button")
+            itm.setAttribute("id", "Checkout");
+            itm.setAttribute("value", "Checkout!");
+            itm1 = document.createElement("input");
+            itm1.setAttribute("type", "hidden")
+            itm1.setAttribute("id", "Cart");
+            itm1.setAttribute("name", "Cart");
+            itm1.setAttribute("value", JSON.stringify(cart));
+            itm2 = document.createElement("input");
+            itm2.setAttribute("type", "hidden")
+            itm2.setAttribute("id", "ItemList");
+            itm2.setAttribute("name", "ItemList");
+            itm2.setAttribute("value", JSON.stringify(itmlist));
+            itm3 = document.createElement("input");
+            itm3.setAttribute("type", "hidden");
+            itm3.setAttribute("id", "supplierid");
+            itm3.setAttribute("name", "supplierid");
+            itm3.setAttribute("value", cart.supid);
+            itm.addEventListener("click", (e) => {
+            var form = e.target.closest("form");
+            //create Order
+            odr.create(form);
+            });
+            formitm.appendChild(itm);
+            formitm.appendChild(itm1);
+            formitm.appendChild(itm2);
+            formitm.appendChild(itm3);
+            ckout.appendChild(formitm);
+            row.appendChild(ckout);
             document.getElementById("id_cart_body").appendChild(row);
             modal.style.display = "block";
             document.getElementById("id_cart_body").style.visibility = "visible";
@@ -714,70 +822,79 @@
 		      });
     };
     this.showSupplier = function(supplierid){
+          var sellid = supplierid;
 					var cartsObj = sessionStorage.getItem("cart");
 					var itemsObj = sessionStorage.getItem("cartItems");
 					var carts = JSON.parse(cartsObj);
 					var items = JSON.parse(itemsObj);
-          var modal = document.getElementById("id01");
-          var span = document.getElementsByClassName("close")[0];
-					document.getElementById("id_cart_body").innerHTML='';
-					carts.forEach(function(cart){
-            if (cart.supid === supplierid){
-						 row = document.createElement("tr");
-	        			 sellname = document.createElement("td");
-	       				 sellname.textContent=cart.supname;
-	        			 row.appendChild(sellname);
-						 cellfortableprod = document.createElement("td");
-						//subtable for product list
-						 itemstable = document.createElement("table");
-         				 newtbrow = document.createElement("tr");
-          				 hd1 = document.createElement("th");
-            			 hd1.textContent = "Product Code";
-            			 newtbrow.appendChild(hd1);
-            			 hd2 = document.createElement("th");
-           				 hd2.textContent = "Product Name";
-           				 newtbrow.appendChild(hd2);
-          				 hd3 = document.createElement("th");
-           				 hd3.textContent = "Qta";
-           				 newtbrow.appendChild(hd3);
-           				 itemstable.appendChild(newtbrow);
-           				 items.forEach(function(item){
-							if(item.supid === cart.supid) {
-								        newbdrow = document.createElement("tr");
-              					     prdcodecell = document.createElement("td");
-             					       prdcodecell.textContent = item.prod_code;
-              					     newbdrow.appendChild(prdcodecell);
-								             prdnamecell = document.createElement("td");
-								             prdnamecell.textContent = item.prod_name;
-								             newbdrow.appendChild(prdnamecell);
-								             qtacell = document.createElement("td");
-								             qtacell.textContent = item.qta;
-								             newbdrow.appendChild(qtacell);
-				                             itemstable.appendChild(newbdrow);
-
-								}
-                cellfortableprod.appendChild(itemstable);
-                row.appendChild(cellfortableprod);
+          var overlay = document.getElementById("ShoppingSupplier");
+          var link = document.getElementsByClassName("close")[0];
+          var relevantCart = carts.filter(function(cart){
+              return cart.supid == supplierid;
+          });
+					document.getElementById("id_cartSupplier_body").innerHTML='';
+					carts.forEach(function(cs){
+            if(cs.supid == sellid){
+                      document.getElementById("sellername").innerHTML= cs.supname;
+						          row = document.createElement("tr");
+	        			      cellfortableprod = document.createElement("td");
+						         //subtable for product list
+						          itemstable = document.createElement("table");
+         				      newtbrow = document.createElement("tr");
+          				    hd1 = document.createElement("th");
+            			    hd1.textContent = "Product Code";
+            			    newtbrow.appendChild(hd1);
+            			    hd2 = document.createElement("th");
+           				    hd2.textContent = "Product Name";
+           				    newtbrow.appendChild(hd2);
+          				    hd3 = document.createElement("th");
+           				    hd3.textContent = "Qta";
+           				    newtbrow.appendChild(hd3);
+                      hd4 = document.createElement("th");
+                      hd4.textContent = "Price per Unit";
+                      newtbrow.appendChild(hd4);
+           				    itemstable.appendChild(newtbrow);
+           				    items.forEach(function(item){
+							                 if(item.supid === cs.supid) {
+								                         newbdrow = document.createElement("tr");
+              					                 prdcodecell = document.createElement("td");
+             					                   prdcodecell.textContent = item.prod_code;
+              					                 newbdrow.appendChild(prdcodecell);
+								                         prdnamecell = document.createElement("td");
+								                         prdnamecell.textContent = item.prod_name;
+								                         newbdrow.appendChild(prdnamecell);
+								                         qtacell = document.createElement("td");
+								                         qtacell.textContent = item.qta;
+                                         newbdrow.appendChild(qtacell);
+                                         pricecell = document.createElement("td");
+                                         pricecell.textContent = ("EUR " + item.price);
+                                         newbdrow.appendChild(pricecell);
+				                                 itemstable.appendChild(newbdrow);
+								                               }
+                      cellfortableprod.appendChild(itemstable);
+                      row.appendChild(cellfortableprod);
 							});
 						//TotalCost cell
 						costcell = document.createElement("td");
-						costcell.textContent = cart.Cost;
+						costcell.textContent = ("EUR " + cs.Cost);
 						row.appendChild(costcell);
 						shipfeecell = document.createElement("td");
-						shipfeecell.textContent = cart.ship;
+						shipfeecell.textContent = ("EUR " + cs.ship);
 						row.appendChild(shipfeecell);
-            document.getElementById("id_cart_body").appendChild(row);
-            modal.style.display = "block";
-            document.getElementById("id_cart_body").style.visibility = "visible";
-            span.onclick = function() {
-              modal.style.display = "none";
+            document.getElementById("id_cartSupplier_body").appendChild(row);
+            overlay.style.display = "block";
+            document.getElementById("id_cartSupplier_body").style.visibility = "visible";
+            document.getElementById("ShoppingSupplier").style.width = "80%";
+            link.onclick = function() {
+              overlay.style.display = "none";
               }
               window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
+                if (event.target == overlay) {
+                    overlay.style.display = "none";
                     }
                   }
               }
+
 		      });
     };
 };
@@ -800,13 +917,40 @@
 		categories.show();
 		document.getElementById("search_tab").style.display = "none";
 		document.getElementById("research").style.display = "none";
+		//Order
+		odr = new Orders();
 		//Shopping Cart
 		shoppingcart = new Cart();
       if (sessionStorage.getItem("cartItems") === null){
           countitem = 0;
           document.getElementById("cart-items").innerHTML = countitem;
+      } else {
+        countitem = 0;
+        var carts = JSON.parse(sessionStorage.getItem("cart"));
+        carts.forEach(function(cart){
+            countitem = parseInt(countitem, 10) + parseInt(cart.totalQta, 10);
+          });
+        document.getElementById("cart-items").innerHTML = countitem;
       }
          						 }
+      //Hidden overlay windows
+        document.getElementById("ShoppingSupplier").style.width = "0%";
+        document.getElementById("ShoppingSupplier").style.display = "none";
   		 };
 
+      this.refresh = function(){
+        if (sessionStorage.getItem("cartItems") === null){
+            countitem = 0;
+            document.getElementById("cart-items").innerHTML = countitem;
+        } else {
+          countitem = 0;
+          var carts = JSON.parse(sessionStorage.getItem("cart"));
+          carts.forEach(function(cart){
+              countitem = parseInt(countitem, 10) + parseInt(cart.totalQta, 10);
+            });
+          document.getElementById("cart-items").innerHTML = countitem;
+        }
+        document.getElementById("ShoppingSupplier").style.width = "0%";
+        document.getElementById("ShoppingSupplier").style.display = "none";
+      };
 	};

@@ -38,3 +38,19 @@
                 }
               }
             };
+
+    function closeAlert(){
+                document.getElementById("myModal").style.display = "none";
+				document.getElementById("id01").style.display = "none";
+      };
+
+  function closeNav() {
+            var over = document.getElementById("ShoppingSupplier").style.width = "0%";
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+              if (event.target == over) {
+                  document.getElementById("ShoppingSupplier").style.width = "0%";
+                  document.getElementById("ShoppingSupplier").style.display = "none";
+                  }
+                }
+          };

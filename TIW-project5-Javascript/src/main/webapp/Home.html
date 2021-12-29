@@ -39,13 +39,32 @@
 	
 	</div>
 	</form>
+	
+	<div id="ShoppingSupplier" class="overlay">
+	<div id="Content" class="overlaycontent">
+  	<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  	<h2 id="SellerHeader">Your Shopping Cart for <span id=sellername></span></h2>
+  	<div class="overlay-content">
+  		<table id="id_cartSupplier">
+			<thead >		
+				<tr>		
+					<th> Product List </th>
+					<th> Total Cost </th>
+					<th> Shipping Fee </th>
+				</tr>
+			<tbody id="id_cartSupplier_body">
+			</tbody>
+		</table>
+  	</div>
+</div>
+
 		<!-- The Modal -->
 <div id="myModal" class="modal">
 
   <!-- Modal content -->
   <div class="modal-content">
     <div class="modal-header">
-      <span class="close">&times;</span>
+      <a href="javascript:void(0)" class="close" onclick="closeAlert()">&times;</a>
       <h2>Alert message...</h2>
     </div>
    <div class="modal-body">
@@ -55,13 +74,13 @@
   </div>
 </div>
 
-		<!-- The Modal -->
+		<!-- The Modal for Shopping Cart -->
 <div id="id01" class="cart_modal">
 
-  <!-- Modal content -->
+  <!-- Modal Shopping Cart content -->
   <div class="cart-content">
     <div class="cart-header">
-      <span class="close" id="close_box">&times;</span>
+      <a href="javascript:void(0)" class="close" onclick="closeAlert()">&times;</a>
       <h2>Your Shopping Cart</h2>
     </div>
    <div class="cart-body">
