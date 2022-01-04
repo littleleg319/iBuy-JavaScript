@@ -16,7 +16,7 @@
 		 <li class="welcome"> Welcome back <span id="id_username"></span>! Enjoy your shopping!</li>
 		<li class="logout"><a href="#" id="logout" onclick="logout()" class="logout">Logout</a></li>
 		 		<li class="orders">
-         <a href="#">My Orders</a>
+         <a href="#" id="orders">My Orders</a>
       </li>
 		<li class="cart">
          <a href="#" id="cart_details">
@@ -98,7 +98,21 @@
    </div>
    </div>
   </div>
-
+	<table id="id_order">
+		<thead >		
+			<tr>		
+				<th> Order Name </th>
+				<th> Seller Name </th>
+				<th> Items List </th>
+				<th> Total Cost </th>
+				<th> Shipping Fee</th>
+				<th> Shipping Date </th>
+				<th> Shipping Address </th>
+			</tr>
+		<tbody id="id_order_body">
+		</tbody>
+	</table>
+	
 	<table id="id_prod_detail">
 		<tbody id="id_prod_detail_body">
 		</tbody>
@@ -118,7 +132,8 @@
 		<tbody id="id_purchase_body">
 		</tbody>
 	</table>
-		
+	<p id="order_ok">Thank you! Your order has been successfully received!</p>
+	<p id="no_orders">Seems that you didn't order anything yet....</p>	
 	<p id ="research" class="research">Results for<span id="id_category"></span><span id="id_keyword"></span></p> 
 	<table id="search_tab">
 		<thead>

@@ -26,6 +26,9 @@
             shoppingcart.show();
         });
 
+    document.getElementById("orders").addEventListener('click', (e) => {
+      odr.show();
+    });
     function PersonalMessage (message_container){
 			var user = sessionStorage.getItem("user");
 			var usr = JSON.parse(user);
@@ -389,6 +392,13 @@
 	};
 
     function Orders(){
+      this.reset = function(){
+        document.getElementById("no_orders").style.display = "none";
+        document.getElementById("order_ok").style.display = "none";
+        document.getElementById("id_order_body").innerHTML='';
+        document.getElementById("id_order").style.display = "none";
+        document.getElementById("id_order_body").style.display = "none";
+      }
       this.create = function(form){
         makeCall("POST","OrdersData", form,
       function(x){
@@ -400,7 +410,7 @@
             var cart = result[0];
             var items = result[1];
             shoppingcart.remove(cart, items);
-            showAlert("Order successfully completed! Thank you!");
+            document.getElementById("order_ok").style.display = "Initial";
             window.location.href = "Home.html";
             break;
             case 500:
@@ -409,6 +419,91 @@
           }
         }
       });
+    }
+    this.show = function(){
+      makeCall("GET", "OrdersData", null, function(x){
+        if (x.readyState == XMLHttpRequest.DONE){
+          switch(x.status){
+            case 200:
+              var result = JSON.parse(x.responseText);
+              var orders = result[0];
+              var items = result[1];
+              document.getElementById("id_order_body").innerHTML='';
+              orders.forEach(function(order){
+                 row = document.createElement("tr");
+                 //Cella order name
+                     odrname = document.createElement("td");
+                     odrname.textContent=order.name;
+                     row.appendChild(odrname);
+                //Cella Seller Name
+                     sellname = document.createElement("td");
+                     sellname.textContent=order.suppliername;
+                     row.appendChild(sellname);
+                //Cella Items List
+                    cellfortableprod = document.createElement("td");
+                    itemstable = document.createElement("table");
+                    newtbrow = document.createElement("tr");
+                       hd1 = document.createElement("th");
+                       hd1.textContent = "Product Code";
+                       newtbrow.appendChild(hd1);
+                       hd2 = document.createElement("th");
+                       hd2.textContent = "Quantity";
+                       newtbrow.appendChild(hd2);
+                       hd3 = document.createElement("th");
+                       hd3.textContent = "Price Unit";
+                       newtbrow.appendChild(hd3);
+                       itemstable.appendChild(newtbrow);
+                       items.forEach(function(item){
+                            if(item.orderid === order.orderid ) {
+                                 newbdrow = document.createElement("tr");
+                                 //Cella Product Code
+                                 prdcodecell = document.createElement("td");
+                                 prdcodecell.textContent = item.productid;
+                                 newbdrow.appendChild(prdcodecell);
+                                 //Cella quantity
+                                 qtacell = document.createElement("td");
+                                 qtacell.textContent = item.qta;
+                                 newbdrow.appendChild(qtacell);
+                                 //Cella Price Unit
+                                 prdnamecell = document.createElement("td");
+                                 prdnamecell.textContent = item.price;
+                                 newbdrow.appendChild(prdnamecell);
+                                itemstable.appendChild(newbdrow);
+                    }
+                    cellfortableprod.appendChild(itemstable);
+                    row.appendChild(cellfortableprod);
+                  });
+                //TotalCost cell
+                costcell = document.createElement("td");
+                costcell.textContent = order.price;
+                row.appendChild(costcell);
+                //Cella per shipping Fee
+                shipfeecell = document.createElement("td");
+                shipfeecell.textContent = order.shipcost;
+                row.appendChild(shipfeecell);
+                //Cella per shipping update
+                shipdtcell = document.createElement("td");
+                shipdtcell.textContent = order.shipdate;
+                row.appendChild(shipdtcell);
+                //Cella per shipping Address
+                shipadrcell = document.createElement("td");
+                shipadrcell.textContent = order.shipaddress;
+                row.appendChild(shipadrcell);
+                document.getElementById("id_order_body").appendChild(row);
+				});
+
+                document.getElementById("id_order").style.display = "Initial";
+                document.getElementById("id_order_body").style.display  = "Initial";
+              break;
+            case 404:
+              document.getElementById("no_orders").style.display = "Initial";
+              break;
+            case 500:
+              window.location.href = "errorPage.html";
+              break;
+          }
+        }
+      })
     }
 }
 
@@ -919,6 +1014,7 @@
 		document.getElementById("research").style.display = "none";
 		//Order
 		odr = new Orders();
+    	odr.reset();
 		//Shopping Cart
 		shoppingcart = new Cart();
       if (sessionStorage.getItem("cartItems") === null){

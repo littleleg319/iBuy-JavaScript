@@ -77,7 +77,7 @@ public class OrdersData extends HttpServlet {
 			for (Order i : myorders) {
 				order_items.addAll(orders.findItemsByOrderId(i.getOrderId()));
 			}
-			String orderList = new Gson().toJson(orders);
+			String orderList = new Gson().toJson(myorders);
 			String itemsList = new Gson().toJson(order_items);
 			String result = "[" + orderList + "," + itemsList +"]";
 			response.setStatus(HttpServletResponse.SC_OK);
