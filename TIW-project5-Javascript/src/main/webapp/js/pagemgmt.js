@@ -144,33 +144,34 @@
 		document.getElementById("research").style.display = "none";
 		var self = this;
 		productdetails.reset();
-		if (keyword === ""){
-				document.getElementById("research").style.display = "none";
-				} else { if (category !== "Initial"){
-					document.getElementById("research").style.display = "initial";
-					document.getElementById("id_keyword").innerHTML = " and Keyword " + keyword;
-					document.getElementById("id_category").innerHTML = " Category " + category;
-          document.getElementById("menu").value = "Initial";
-          document.getElementById("keyword").value = "";
-					} else {
-					document.getElementById("research").style.display = "initial";
-					document.getElementById("id_keyword").innerHTML = " Keyword " + keyword;
-          document.getElementById("keyword").value = "";
-					}
-				};
-		if (category !== "Initial"){
-			if (keyword === ""){
-					document.getElementById("research").style.display = "initial";
-					document.getElementById("id_category").innerHTML = " Category " + category;}
-          document.getElementById("menu").value = "Initial";
-		}
-					container_body.style.visibility="hidden";
+		container_body.style.visibility="hidden";
 				makeCall("GET","ShowResultsData?category=" + category + "&keyword=" + keyword, form,
 			function(x){
 				if (x.readyState == XMLHttpRequest.DONE) {
            			 var message = x.responseText;
             switch (x.status) {
               case 200:
+              if (keyword === ""){
+                  document.getElementById("research").style.display = "none";
+                  } else { if (category !== "Initial"){
+                    document.getElementById("research").style.display = "initial";
+                    document.getElementById("id_keyword").innerHTML = " and Keyword " + keyword;
+                    document.getElementById("id_category").innerHTML = " Category " + category;
+                    document.getElementById("menu").value = "Initial";
+                    document.getElementById("keyword").value = "";
+                    } else {
+                    document.getElementById("research").style.display = "initial";
+                    document.getElementById("id_keyword").innerHTML = " Keyword " + keyword;
+                    document.getElementById("keyword").value = "";
+                    }
+                  };
+              if (category !== "Initial"){
+                if (keyword === ""){
+                    document.getElementById("research").style.display = "initial";
+                    document.getElementById("id_category").innerHTML = " Category " + category;}
+                    document.getElementById("menu").value = "Initial";
+              }
+                    container_body.style.visibility="hidden";
 				container_body.innerHTML = "";
 				 var products = JSON.parse(x.responseText);
 				 products.forEach(function(product){
@@ -278,15 +279,19 @@
       	    suppliers.forEach(function(supplier){
             newrow = document.createElement("tr");
             sellername = document.createElement("td");
+            sellername.setAttribute("class", "pcy");
             sellername.textContent = supplier.name;
             newrow.appendChild(sellername);
             rating = document.createElement("td");
+            rating.setAttribute("class", "pcy");
             rating.textContent = supplier.rating;
             newrow.appendChild(rating);
             pricecell = document.createElement("td");
+            pricecell.setAttribute("class", "pcy");
             pricecell.textContent = ("EUR  	" + supplier.prodPrice);
             newrow.appendChild(pricecell);
             freecell = document.createElement("td");
+            freecell.setAttribute("class", "pcy");
             freecell.textContent = ("EUR  	" + supplier.freeshipping);
             newrow.appendChild(freecell);
             qtacell = document.createElement("td");
@@ -334,9 +339,11 @@
               if (range.supplierid === supplier.supplierid){
               newbodyrow = document.createElement("tr");
               minartcell = document.createElement("td");
+              minartcell.setAttribute("class", "pcy");
               minartcell.textContent = range.minArt;
               newbodyrow.appendChild(minartcell);
               maxartcell = document.createElement("td");
+              maxartcell.setAttribute("class", "pcy");
                 if (range.maxArt === 9999999){
                   maxartcell.textContent = "-";
                   newbodyrow.appendChild(maxartcell);
@@ -345,7 +352,8 @@
                   newbodyrow.appendChild(maxartcell);
                 }
               feecell = document.createElement("td");
-              feecell.textContent = range.price;
+              feecell.setAttribute("class", "pcy");
+              feecell.textContent = ("EUR " + range.price);
               newbodyrow.appendChild(feecell);
               policytable.appendChild(newbodyrow);
               cellfortable.appendChild(policytable);
@@ -414,8 +422,7 @@
             var cart = result[0];
             var items = result[1];
             shoppingcart.remove(cart, items);
-            window.location.href = "Home.html";
-            document.getElementById("order_ok").style.display = "Initial";
+            window.location.href = "Home.html?odr=ok";
             break;
             case 500:
               window.location.href = "errorPage.html";
@@ -437,14 +444,17 @@
                  row = document.createElement("tr");
                  //Cella order name
                      odrname = document.createElement("td");
+                     odrname.setAttribute("class", "pcy");
                      odrname.textContent=order.name;
                      row.appendChild(odrname);
                 //Cella Seller Name
                      sellname = document.createElement("td");
+                     sellname.setAttribute("class", "pcy");
                      sellname.textContent=order.suppliername;
                      row.appendChild(sellname);
                 //Cella Items List
                     cellfortableprod = document.createElement("td");
+                    cellfortableprod.setAttribute("class", "pcy");
                     itemstable = document.createElement("table");
                     newtbrow = document.createElement("tr");
                        hd1 = document.createElement("th");
@@ -462,15 +472,18 @@
                                  newbdrow = document.createElement("tr");
                                  //Cella Product Code
                                  prdcodecell = document.createElement("td");
+                                 prdcodecell.setAttribute("class", "pcy");
                                  prdcodecell.textContent = item.productid;
                                  newbdrow.appendChild(prdcodecell);
                                  //Cella quantity
                                  qtacell = document.createElement("td");
+                                 qtacell.setAttribute("class", "pcy");
                                  qtacell.textContent = item.qta;
                                  newbdrow.appendChild(qtacell);
                                  //Cella Price Unit
                                  prdnamecell = document.createElement("td");
-                                 prdnamecell.textContent = item.price;
+                                 prdnamecell.setAttribute("class", "pcy");
+                                 prdnamecell.textContent = ("EUR " + item.price);
                                  newbdrow.appendChild(prdnamecell);
                                 itemstable.appendChild(newbdrow);
                     }
@@ -479,18 +492,26 @@
                   });
                 //TotalCost cell
                 costcell = document.createElement("td");
-                costcell.textContent = order.price;
+                costcell.setAttribute("class", "pcy");
+                costcell.textContent = ("EUR " + order.price);
                 row.appendChild(costcell);
                 //Cella per shipping Fee
                 shipfeecell = document.createElement("td");
-                shipfeecell.textContent = order.shipcost;
+                shipfeecell.setAttribute("class", "pcy");
+                if (order.shipcost === 0){
+                  shipfeecell.textContent = "Free Shipping";
+                } else {
+                  shipfeecell.textContent = ("EUR " + order.shipcost);
+                }
                 row.appendChild(shipfeecell);
                 //Cella per shipping update
                 shipdtcell = document.createElement("td");
+                shipdtcell.setAttribute("class", "pcy");
                 shipdtcell.textContent = order.shipdate;
                 row.appendChild(shipdtcell);
                 //Cella per shipping Address
                 shipadrcell = document.createElement("td");
+                shipadrcell.setAttribute("class", "pcy");
                 shipadrcell.textContent = order.shipaddress;
                 row.appendChild(shipadrcell);
                 document.getElementById("id_order_body").appendChild(row);
@@ -498,6 +519,8 @@
 
                 document.getElementById("id_order").style.display = "Initial";
                 document.getElementById("id_order_body").style.display  = "table-row-group";
+                document.getElementById("id_prod_detail").style.display = "none";
+                document.getElementById("id_purchase").style.display = "none";
                 RecentSeenProduct.reset();
               break;
             case 404:
@@ -821,6 +844,9 @@
 					var itemsObj = sessionStorage.getItem("cartItems");
 					var carts = JSON.parse(cartsObj);
 					var items = JSON.parse(itemsObj);
+          if (carts == null || items == null){
+            showAlert("Your shopping cart is empty....Hurry up to fill it up!");
+          } else {
           var modal = document.getElementById("id01");
           var span = document.getElementsByClassName("close")[0];
 					document.getElementById("id_cart_body").innerHTML='';
@@ -863,10 +889,14 @@
 							});
 						//TotalCost cell
 						costcell = document.createElement("td");
-						costcell.textContent = cart.Cost;
+						costcell.textContent = ("EUR " + cart.Cost);
 						row.appendChild(costcell);
 						shipfeecell = document.createElement("td");
-						shipfeecell.textContent = cart.ship;
+            if (cart.ship === 0){
+              shipfeecell.textContent = "Free Shipping";
+            } else {
+              shipfeecell.textContent = ("EUR " + cart.ship);
+            }
 						row.appendChild(shipfeecell);
             //Checkout
             var itmlist = [];
@@ -925,6 +955,7 @@
                     }
                   }
 		      });
+        };
     };
     this.showSupplier = function(supplierid){
           var sellid = supplierid;
@@ -963,15 +994,19 @@
 							                 if(item.supid === cs.supid) {
 								                         newbdrow = document.createElement("tr");
               					                 prdcodecell = document.createElement("td");
+                                         prdcodecell.setAttribute("class", "pcy");
              					                   prdcodecell.textContent = item.prod_code;
               					                 newbdrow.appendChild(prdcodecell);
 								                         prdnamecell = document.createElement("td");
+                                         prdnamecell.setAttribute("class", "pcy");
 								                         prdnamecell.textContent = item.prod_name;
 								                         newbdrow.appendChild(prdnamecell);
 								                         qtacell = document.createElement("td");
+                                         qtacell.setAttribute("class", "pcy");
 								                         qtacell.textContent = item.qta;
                                          newbdrow.appendChild(qtacell);
                                          pricecell = document.createElement("td");
+                                         pricecell.setAttribute("class", "pcy");
                                          pricecell.textContent = ("EUR " + item.price);
                                          newbdrow.appendChild(pricecell);
 				                                 itemstable.appendChild(newbdrow);
@@ -981,9 +1016,11 @@
 							});
 						//TotalCost cell
 						costcell = document.createElement("td");
+            costcell.setAttribute("class", "pcy");
 						costcell.textContent = ("EUR " + cs.Cost);
 						row.appendChild(costcell);
 						shipfeecell = document.createElement("td");
+            shipfeecell.setAttribute("class", "pcy");
 						shipfeecell.textContent = ("EUR " + cs.ship);
 						row.appendChild(shipfeecell);
             document.getElementById("id_cartSupplier_body").appendChild(row);
@@ -1025,6 +1062,15 @@
 		//Order
 		odr = new Orders();
     	odr.reset();
+      var url_string = window.location.href;
+      var url = new URL(url_string);
+      var param = new URLSearchParams(url.search);
+      var order = param.get("odr");
+      if (order === "ok"){
+        document.getElementById("order_ok").style.display = "Initial";
+        window.history.replaceState('','',"Home.html");
+
+      }
 		//Shopping Cart
 		shoppingcart = new Cart();
       if (sessionStorage.getItem("cartItems") === null){
