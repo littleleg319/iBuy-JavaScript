@@ -66,13 +66,14 @@ li a {
 }
 
 .cart-number{
-	height: 16px;
-    width: 16px;
+	height: 18px;
+    width: 18px;
     background-color: coral;
     border-radius: 50%;
     display: inline-block;
     font-weight: bold;
     color:white;
+    font-size: small;
 }
 
 table {
@@ -277,7 +278,7 @@ p#research {
   margin: auto;
   padding: 0;
   border: 1px solid #888;
-  width: 30%;
+  width: 40%;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,s0,0.19);
   -webkit-animation-name: animatetop;
   -webkit-animation-duration: 0.4s;
@@ -344,4 +345,76 @@ p#research {
 h2#SellerHeader {
 	color: white;
     text-align: center;
+}
+
+.checkout {
+    background-color: #2492ff;
+    color: white;
+    padding: 8px 20px;
+    margin: 9px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font: bold 12px Verdana, sans-serif;
+}
+
+.qta {
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.policy {
+	    margin: 0;
+    width: fit-content;
+    font-size: x-small;
+    background-color: thistle;
+}
+
+.btnsuppl {
+  background-color: #e1ecf4;
+  border-radius: 3px;
+  border: 1px solid #7aa7c7;
+  box-shadow: rgba(255, 255, 255, .7) 0 1px 0 0 inset;
+  box-sizing: border-box;
+  color: #39739d;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.15385;
+  margin: 0;
+  outline: none;
+  padding: 8px .8em;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+.btnsuppl:hover,
+.btnsuppl:focus {
+  background-color: #b3d3ea;
+  color: #2c5777;
+}
+
+.btnsuppl:focus {
+  box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+}
+
+.btnsuppl:active {
+  background-color: #a0c7e4;
+  box-shadow: none;
+  color: #2c5777;
 }

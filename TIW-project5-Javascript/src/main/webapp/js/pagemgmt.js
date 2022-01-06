@@ -296,9 +296,11 @@
             field.setAttribute("type", "number");
             field.setAttribute("min", "1");
             field.setAttribute("id", "qta");
+            field.setAttribute("class", "qta");
             btncell = document.createElement("input");
             btncell.setAttribute("type", "button");
             btncell.setAttribute("value","Add to Cart!");
+            btncell.setAttribute("class", "checkout");
             btncell.addEventListener("click", (e) => {
                   var quantity = e.target.closest("form").elements.namedItem("qta").value;
                   if(isNaN(quantity)){ //Check type is number
@@ -316,6 +318,7 @@
             cellfortable = document.createElement("td");
               //create subtable for shipping policy
             policytable = document.createElement("table");
+            policytable.setAttribute("class", "policy");
             newtablerow = document.createElement("tr");
             head1 = document.createElement("th");
             head1.textContent = "Minimum Articles";
@@ -366,6 +369,7 @@
                 itm.setAttribute("id", "itemCartSup");
                 itm.setAttribute("value", cj.totalQta )
                 itm.setAttribute("supplierid", cj.supid);
+                itm.setAttribute("class", "btnsuppl");
                 itm.addEventListener("pointerover", (e) => {
                   shoppingcart.showSupplier(e.target.getAttribute("supplierid"));
                 });
@@ -410,8 +414,8 @@
             var cart = result[0];
             var items = result[1];
             shoppingcart.remove(cart, items);
-            document.getElementById("order_ok").style.display = "Initial";
             window.location.href = "Home.html";
+            document.getElementById("order_ok").style.display = "Initial";
             break;
             case 500:
               window.location.href = "errorPage.html";
@@ -493,7 +497,8 @@
 				});
 
                 document.getElementById("id_order").style.display = "Initial";
-                document.getElementById("id_order_body").style.display  = "Initial";
+                document.getElementById("id_order_body").style.display  = "table-row-group";
+                RecentSeenProduct.reset();
               break;
             case 404:
               document.getElementById("no_orders").style.display = "Initial";
@@ -513,18 +518,19 @@
         var shoppingCarts = sessionStorage.getItem("cart");
         var shoppingCartsItems = sessionStorage.getItem("cartItems");
         var carts = JSON.parse(shoppingCarts);
-        var items = JSON.parse(shoppingCartsItems);
+        var itms = JSON.parse(shoppingCartsItems);
         if (carts.length === 1){ //ho un solo carrello
           window.sessionStorage.removeItem('cart');
           window.sessionStorage.removeItem('cartItems');
         } else { //ho altri oggetti nel carrello
             let pos = carts.indexOf(cart);
             carts.splice(pos, 1);
-            let positm = items.indexOf(items);
-            let number = items.lenght;
-            items.splice(positm, number);
+            items.forEach(function(item){
+              let positm = itms.indexOf(item);
+              itms.splice(positm, 1);
+            });
             var cartupdate = JSON.stringify(carts);
-            var itmupdate = JSON.stringify(items);
+            var itmupdate = JSON.stringify(itms);
             sessionStorage.setItem("cart", cartupdate);
             sessionStorage.setItem("cartItems", itmupdate);
         }
@@ -732,6 +738,7 @@
         });
       } else if (!incart && !initem){ //non ho il carrello per questo fornitore
          var  totalCost = prodPrice * qta;
+         totalCost = parseFloat(totalCost).toFixed(2);
          if (totalCost < freeshipping){
                    makeCall("GET","ShippingFeeData?number=" + qta + "&supid=" + supplierid, null,
                  function(x){
@@ -791,8 +798,10 @@
                            "totalQta": qta,
                            "freeship": freeshipping
                             };
-                   var cartupd = JSON.stringify(newCartSup);
-                   var cartItemsupd = JSON.stringify(newItemSup);
+                   itemsSessions.push(newItemSup);
+                   cartsSessions.push(newCartSup);
+                   var cartupd = JSON.stringify(cartsSessions);
+                   var cartItemsupd = JSON.stringify(itemsSessions);
                    sessionStorage.setItem("cart", cartupd);
                    sessionStorage.setItem("cartItems", cartItemsupd);
                    countitem = parseInt(countitem, 10) + parseInt(qta, 10);
@@ -877,6 +886,7 @@
             itm.setAttribute("type", "button")
             itm.setAttribute("id", "Checkout");
             itm.setAttribute("value", "Checkout!");
+            itm.setAttribute("class", "checkout");
             itm1 = document.createElement("input");
             itm1.setAttribute("type", "hidden")
             itm1.setAttribute("id", "Cart");
