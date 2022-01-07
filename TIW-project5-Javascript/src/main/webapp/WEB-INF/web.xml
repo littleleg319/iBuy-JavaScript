@@ -36,6 +36,8 @@
     <url-pattern>/ShowCategories</url-pattern>
 	<url-pattern>/ShowResultsData</url-pattern>
 	<url-pattern>/ProductDetailData</url-pattern>
+	<url-pattern>/OrdersData</url-pattern>
+	<url-pattern>/ShippingFeeData</url-pattern>
   </filter-mapping> 
   <welcome-file-list>
     <welcome-file>default.html</welcome-file>

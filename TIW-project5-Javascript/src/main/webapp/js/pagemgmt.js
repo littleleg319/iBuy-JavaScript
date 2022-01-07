@@ -142,6 +142,7 @@
     document.getElementById("id_category").innerHTML = "";
     document.getElementById("id_keyword").innerHTML = "";
 		document.getElementById("research").style.display = "none";
+    odr.reset();
 		var self = this;
 		productdetails.reset();
 		container_body.style.visibility="hidden";
@@ -1021,7 +1022,11 @@
 						row.appendChild(costcell);
 						shipfeecell = document.createElement("td");
             shipfeecell.setAttribute("class", "pcy");
-						shipfeecell.textContent = ("EUR " + cs.ship);
+            if (cs.ship === 0){
+              shipfeecell.textContent = "Free Shipping";
+            } else {
+              shipfeecell.textContent = ("EUR " + cs.ship);
+            }
 						row.appendChild(shipfeecell);
             document.getElementById("id_cartSupplier_body").appendChild(row);
             overlay.style.display = "block";
