@@ -314,6 +314,7 @@
                   } else if (Math.sign(quantity) === 1 ){ // Check qta >= 1
                       shoppingcart.update(quantity, supplier.name, details.name, supplier.supplierid, code, supplier.prodPrice, supplier.freeshipping);
                       e.target.closest("form").elements.namedItem("qta").value = '';
+					  productdetails.show(code);
                   } else
                       showAlert("Please insert a valid value!");
 	     	         }, false);
